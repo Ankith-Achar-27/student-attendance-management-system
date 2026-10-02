@@ -14,14 +14,14 @@ export const SubjectAttendance = () => {
     loadSubjectAttendance();
   }, [activeUser]);
 
-  const loadSubjectAttendance = () => {
-    const studentId = activeUser?.entity?.id || 'stud-042';
-    const computed = attendanceService.calculateStudentOverallStats(studentId);
-    setStats(computed);
+  const loadSubjectAttendance = async () => {
+    const studentId = activeUser?.entityId || activeUser?.entity?.id || 'stud-042';
+    const computed = await attendanceService.calculateStudentOverallStats(studentId);
+    setStats(computed || { subjectBreakdown: [], student: null });
 
-    const allFaculty = facultyService.getAll();
+    const allFaculty = await facultyService.getAll();
     const map = {};
-    allFaculty.forEach((f) => {
+    (allFaculty || []).forEach((f) => {
       map[f.id] = f.name;
     });
     setFacultyMap(map);

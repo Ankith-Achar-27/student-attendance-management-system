@@ -13,19 +13,19 @@ export const AdminDashboard = () => {
   });
   const [deptSummaries, setDeptSummaries] = useState([]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    const calculatedMetrics = reportService.getOverallInstituteMetrics();
-    const calculatedSummaries = reportService.getDepartmentSummaries();
+  const loadData = React.useCallback(async () => {
+    const calculatedMetrics = await reportService.getOverallInstituteMetrics();
+    const calculatedSummaries = await reportService.getDepartmentSummaries();
     setMetrics(calculatedMetrics);
     setDeptSummaries(calculatedSummaries);
-  };
+  }, []);
 
-  const handleExportDefaulters = () => {
-    const defaulters = reportService.getDefaulterList(75);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleExportDefaulters = async () => {
+    const defaulters = await reportService.getDefaulterList(75);
     const headers = ['Roll Number', 'Student Name', 'Department', 'Semester', 'Section', 'Total Classes', 'Attended', 'Attendance %'];
     const rows = defaulters.map((d) => [
       d.rollNumber,

@@ -10,14 +10,23 @@ export const AdminReports = () => {
   const [defaulters, setDefaulters] = useState([]);
   const [notice, setNotice] = useState(null);
 
-  useEffect(() => {
-    loadDefaulters();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadDefaulters = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const list = await reportService.getDefaulterList(Number(threshold), selectedDept, selectedSem);
+      setDefaulters(list || []);
+    } catch (err) {
+      console.error('Failed to load defaulters', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [threshold, selectedDept, selectedSem]);
 
-  const loadDefaulters = () => {
-    const list = reportService.getDefaulterList(Number(threshold), selectedDept, selectedSem);
-    setDefaulters(list);
-  };
+  useEffect(() => {
+    loadDefaulters();
+  }, [loadDefaulters]);
 
   const handleExportCSV = () => {
     if (defaulters.length === 0) {
@@ -167,7 +176,13 @@ export const AdminReports = () => {
               </tr>
             </thead>
             <tbody>
-              {defaulters.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontWeight: 500 }}>
+                    ⏳ Auditing attendance records...
+                  </td>
+                </tr>
+              ) : defaulters.length === 0 ? (
                 <tr>
                   <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: '#166534', fontWeight: 500 }}>
                     ✅ No students fall below {threshold}% attendance for the selected criteria.

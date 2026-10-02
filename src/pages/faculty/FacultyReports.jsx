@@ -16,11 +16,11 @@ export const FacultyReports = () => {
     loadSubjects();
   }, [activeUser]);
 
-  const loadSubjects = () => {
+  const loadSubjects = async () => {
     const facultyId = activeUser?.entityId || activeUser?.entity?.id;
-    const subs = facultyId ? subjectService.getByFaculty(facultyId) : [];
-    setAssignedSubjects(subs);
-    if (subs.length > 0) {
+    const subs = facultyId ? await subjectService.getByFaculty(facultyId) : [];
+    setAssignedSubjects(subs || []);
+    if (subs && subs.length > 0) {
       setSelectedSubjectId(subs[0].id);
     } else {
       setSelectedSubjectId('');
@@ -34,9 +34,9 @@ export const FacultyReports = () => {
     }
   }, [selectedSubjectId]);
 
-  const loadRegister = (subjId) => {
-    const data = attendanceService.calculateCourseRegisterStats(subjId);
-    setRegisterData(data);
+  const loadRegister = async (subjId) => {
+    const data = await attendanceService.calculateCourseRegisterStats(subjId);
+    setRegisterData(data || { subject: null, sessionsCount: 0, studentStats: [] });
   };
 
   const handleExportCSV = () => {

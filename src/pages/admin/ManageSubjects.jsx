@@ -27,14 +27,27 @@ export const ManageSubjects = () => {
   const [formError, setFormError] = useState('');
   const [notice, setNotice] = useState(null);
 
-  useEffect(() => {
-    loadData();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadData = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [subs, facs] = await Promise.all([
+        subjectService.getAll(),
+        facultyService.getAll(),
+      ]);
+      setSubjects(subs || []);
+      setFacultyList(facs || []);
+    } catch (err) {
+      console.error('Failed to load subjects data', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const loadData = () => {
-    setSubjects(subjectService.getAll());
-    setFacultyList(facultyService.getAll());
-  };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const openAddSubjectModal = () => {
     setEditingSubjectId(null);
@@ -64,15 +77,15 @@ export const ManageSubjects = () => {
     setIsSubjectModalOpen(true);
   };
 
-  const handleSubjectSubmit = (e) => {
+  const handleSubjectSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
 
     let res;
     if (editingSubjectId) {
-      res = subjectService.update(editingSubjectId, subjectFormData);
+      res = await subjectService.update(editingSubjectId, subjectFormData);
     } else {
-      res = subjectService.add(subjectFormData);
+      res = await subjectService.add(subjectFormData);
     }
 
     if (!res.success) {
@@ -81,7 +94,7 @@ export const ManageSubjects = () => {
     }
 
     setIsSubjectModalOpen(false);
-    loadData();
+    await loadData();
     setNotice({
       type: 'info',
       message: editingSubjectId
@@ -97,18 +110,18 @@ export const ManageSubjects = () => {
     setIsAssignModalOpen(true);
   };
 
-  const handleAssignSubmit = (e) => {
+  const handleAssignSubmit = async (e) => {
     e.preventDefault();
     if (!assigningSubject) return;
 
-    const res = subjectService.assignFaculty(assigningSubject.id, selectedFacultyId || null);
+    const res = await subjectService.assignFaculty(assigningSubject.id, selectedFacultyId || null);
     if (!res.success) {
       setFormError(res.error);
       return;
     }
 
     setIsAssignModalOpen(false);
-    loadData();
+    await loadData();
     const assignedFac = facultyList.find((f) => f.id === selectedFacultyId);
     setNotice({
       type: 'info',
@@ -118,9 +131,9 @@ export const ManageSubjects = () => {
     });
   };
 
-  const handleDeleteSubject = (id, code) => {
-    subjectService.delete(id);
-    loadData();
+  const handleDeleteSubject = async (id, code) => {
+    await subjectService.delete(id);
+    await loadData();
     setNotice({
       type: 'warning',
       message: `Subject ${code} removed from catalog.`,
@@ -192,7 +205,13 @@ export const ManageSubjects = () => {
               </tr>
             </thead>
             <tbody>
-              {subjects.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                    ⏳ Loading curriculum subjects...
+                  </td>
+                </tr>
+              ) : subjects.length === 0 ? (
                 <tr>
                   <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
                     No subjects in catalog. Click '+ Create Subject' to add one.

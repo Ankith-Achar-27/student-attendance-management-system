@@ -24,13 +24,14 @@ export const ManageStudents = () => {
   const [formError, setFormError] = useState('');
   const [notice, setNotice] = useState(null);
 
-  useEffect(() => {
-    loadStudents();
+  const loadStudents = React.useCallback(async () => {
+    const list = await studentService.getAll();
+    setStudents(list || []);
   }, []);
 
-  const loadStudents = () => {
-    setStudents(studentService.getAll());
-  };
+  useEffect(() => {
+    loadStudents();
+  }, [loadStudents]);
 
   const openAddModal = () => {
     setEditingStudentId(null);
@@ -62,15 +63,15 @@ export const ManageStudents = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
 
     let result;
     if (editingStudentId) {
-      result = studentService.update(editingStudentId, formData);
+      result = await studentService.update(editingStudentId, formData);
     } else {
-      result = studentService.add(formData);
+      result = await studentService.add(formData);
     }
 
     if (!result.success) {
@@ -79,7 +80,7 @@ export const ManageStudents = () => {
     }
 
     setIsModalOpen(false);
-    loadStudents();
+    await loadStudents();
     setNotice({
       type: 'info',
       message: editingStudentId
@@ -88,10 +89,10 @@ export const ManageStudents = () => {
     });
   };
 
-  const handleToggleStatus = (id) => {
-    const res = studentService.toggleStatus(id);
+  const handleToggleStatus = async (id) => {
+    const res = await studentService.toggleStatus(id);
     if (res.success) {
-      loadStudents();
+      await loadStudents();
       setNotice({
         type: 'info',
         message: `Status updated for ${res.data.name} to ${res.data.status}.`,
@@ -99,9 +100,9 @@ export const ManageStudents = () => {
     }
   };
 
-  const handleDelete = (id, name) => {
-    studentService.delete(id);
-    loadStudents();
+  const handleDelete = async (id, name) => {
+    await studentService.delete(id);
+    await loadStudents();
     setNotice({
       type: 'warning',
       message: `Student record for ${name} has been removed.`,

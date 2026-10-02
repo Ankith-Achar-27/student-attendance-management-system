@@ -15,20 +15,21 @@ export const AttendanceLog = () => {
     loadHistory();
   }, [activeUser, filterSubjectId]);
 
-  const loadHistory = () => {
-    const studentId = activeUser?.entity?.id || 'stud-042';
-    const log = attendanceService.getStudentAttendanceHistory(studentId, filterSubjectId);
-    setHistory(log);
+  const loadHistory = async () => {
+    const studentId = activeUser?.entityId || activeUser?.entity?.id || 'stud-042';
+    const log = await attendanceService.getStudentAttendanceHistory(studentId, filterSubjectId);
+    setHistory(log || []);
 
     // Get subjects applicable to student's department & semester
     if (activeUser?.entity) {
-      const subs = subjectService.getByDepartmentAndSemester(
+      const subs = await subjectService.getByDepartmentAndSemester(
         activeUser.entity.department,
         activeUser.entity.semester
       );
-      setAvailableSubjects(subs);
+      setAvailableSubjects(subs || []);
     } else {
-      setAvailableSubjects(subjectService.getAll());
+      const allSubs = await subjectService.getAll();
+      setAvailableSubjects(allSubs || []);
     }
   };
 

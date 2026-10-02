@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Verify user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: Retrieve authenticated user profile from /users collection
+    function getUserProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Role verification helpers
+    function isAdmin() {
+      return isAuthenticated() && getUserProfile().role == 'ADMIN';
+    }
+
+    function isFaculty() {
+      return isAuthenticated() && getUserProfile().role == 'FACULTY';
+    }
+
+    function isStudent() {
+      return isAuthenticated() && getUserProfile().role == 'STUDENT';
+    }
+
+    // 1. Users collection
+    // - Users can read their own profile; Admin can read/manage all user records
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // 2. Students collection
+    // - Read allowed for institutional authenticated users
+    // - Modification restricted strictly to Admin
+    match /students/{studentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 3. Faculty collection
+    // - Read allowed for institutional authenticated users
+    // - Modification restricted strictly to Admin
+    match /faculty/{facultyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 4. Subjects collection
+    // - Read allowed for institutional authenticated users
+    // - Modification restricted strictly to Admin
+    match /subjects/{subjectId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 5. Attendance Sessions collection
+    // - Read allowed for institutional authenticated users (Students audit their records, Faculty verify registers)
+    // - Create: Admin, or Faculty where session's facultyId matches their linked instructor ID
+    // - Update: Admin, or Faculty where existing session belongs to their assigned instructor ID
+    // - Delete: Restricted strictly to Admin
+    // - Students are explicitly barred from write permissions
+    match /attendanceSessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() || (isFaculty() && request.resource.data.facultyId == getUserProfile().linkedEntityId);
+      allow update: if isAdmin() || (isFaculty() && resource.data.facultyId == getUserProfile().linkedEntityId);
+      allow delete: if isAdmin();
+    }
+  }
+}

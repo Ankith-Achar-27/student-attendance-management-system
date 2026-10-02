@@ -1,35 +1,69 @@
 /**
- * Attendance Service - Core Business Logic & Dynamic Attendance Calculations
- * Source of truth: Session records. Percentages are ALWAYS computed dynamically.
+ * Attendance Service (Phase 4 - Cloud Firestore Backed)
+ * Manages attendance sessions and dynamic attendance calculations.
+ * Attendance percentages are ALWAYS calculated dynamically from session records.
  */
 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '../firebase/config';
 import { storageService, STORAGE_KEYS } from './storageService';
 import { studentService } from './studentService';
 import { subjectService } from './subjectService';
 
 export const attendanceService = {
-  getAllSessions() {
+  async getAllSessions() {
+    if (isFirebaseConfigured && db) {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'attendanceSessions'));
+        const list = [];
+        querySnapshot.forEach((d) => {
+          list.push({ id: d.id, ...d.data() });
+        });
+        if (list.length > 0) {
+          storageService.setItem(STORAGE_KEYS.SESSIONS, list);
+          return list;
+        }
+      } catch (err) {
+        console.warn('Firestore attendance fetch fallback:', err.message);
+      }
+    }
     return storageService.getItem(STORAGE_KEYS.SESSIONS) || [];
   },
 
-  getSessionById(id) {
-    const sessions = this.getAllSessions();
+  async getSessionById(id) {
+    if (isFirebaseConfigured && db && id) {
+      try {
+        const docSnap = await getDoc(doc(db, 'attendanceSessions', id));
+        if (docSnap.exists()) {
+          return { id: docSnap.id, ...docSnap.data() };
+        }
+      } catch (err) {
+        console.warn('Firestore session getById fallback:', err.message);
+      }
+    }
+    const sessions = await this.getAllSessions();
     return sessions.find((s) => s.id === id) || null;
   },
 
-  getSessionsBySubject(subjectId) {
-    const sessions = this.getAllSessions();
+  async getSessionsBySubject(subjectId) {
+    const sessions = await this.getAllSessions();
     return sessions.filter((s) => s.subjectId === subjectId);
   },
 
-  getSessionsByFaculty(facultyId) {
-    const sessions = this.getAllSessions();
+  async getSessionsByFaculty(facultyId) {
+    const sessions = await this.getAllSessions();
     return sessions.filter((s) => s.facultyId === facultyId);
   },
 
-  // Duplicate session check (prevent accidental double marking of same subject/date/slot)
-  checkDuplicateSession(subjectId, date, period, excludeSessionId = null) {
-    const sessions = this.getAllSessions();
+  async checkDuplicateSession(subjectId, date, period, excludeSessionId = null) {
+    const sessions = await this.getAllSessions();
     return sessions.some(
       (s) =>
         s.id !== excludeSessionId &&
@@ -39,7 +73,7 @@ export const attendanceService = {
     );
   },
 
-  saveSession(sessionData) {
+  async saveSession(sessionData) {
     const { id, subjectId, facultyId, date, period, records } = sessionData;
 
     if (!subjectId) {
@@ -55,7 +89,7 @@ export const attendanceService = {
       return { success: false, error: 'Attendance records for students are required.' };
     }
 
-    const sessions = this.getAllSessions();
+    const sessions = await this.getAllSessions();
 
     if (id) {
       // Editing existing session
@@ -64,14 +98,15 @@ export const attendanceService = {
         return { success: false, error: 'Session not found to update.' };
       }
 
-      if (this.checkDuplicateSession(subjectId, date, period, id)) {
+      const isDup = await this.checkDuplicateSession(subjectId, date, period, id);
+      if (isDup) {
         return {
           success: false,
           error: `Another session for this subject on ${date} during ${period} already exists.`,
         };
       }
 
-      sessions[index] = {
+      const updatedSession = {
         ...sessions[index],
         subjectId,
         facultyId: facultyId || sessions[index].facultyId,
@@ -81,11 +116,21 @@ export const attendanceService = {
         updatedAt: new Date().toISOString(),
       };
 
+      if (isFirebaseConfigured && db) {
+        try {
+          await updateDoc(doc(db, 'attendanceSessions', id), updatedSession);
+        } catch (err) {
+          console.warn('Firestore session update failed:', err.message);
+        }
+      }
+
+      sessions[index] = updatedSession;
       storageService.setItem(STORAGE_KEYS.SESSIONS, sessions);
-      return { success: true, data: sessions[index] };
+      return { success: true, data: updatedSession };
     } else {
       // New session
-      if (this.checkDuplicateSession(subjectId, date, period)) {
+      const isDup = await this.checkDuplicateSession(subjectId, date, period);
+      if (isDup) {
         return {
           success: false,
           error: `An attendance session for this subject on ${date} (${period}) has already been recorded. Use Edit Attendance to modify it.`,
@@ -102,6 +147,14 @@ export const attendanceService = {
         createdAt: new Date().toISOString(),
       };
 
+      if (isFirebaseConfigured && db) {
+        try {
+          await setDoc(doc(db, 'attendanceSessions', newSession.id), newSession);
+        } catch (err) {
+          console.warn('Firestore session write failed:', err.message);
+        }
+      }
+
       sessions.push(newSession);
       storageService.setItem(STORAGE_KEYS.SESSIONS, sessions);
       return { success: true, data: newSession };
@@ -109,13 +162,13 @@ export const attendanceService = {
   },
 
   // Calculate dynamic attendance stats for a single student in a specific subject
-  calculateStudentSubjectStats(studentId, subjectId) {
-    const sessions = this.getSessionsBySubject(subjectId);
+  async calculateStudentSubjectStats(studentId, subjectId) {
+    const sessions = await this.getSessionsBySubject(subjectId);
     let totalHeld = 0;
     let attended = 0;
 
     sessions.forEach((session) => {
-      const record = session.records.find((r) => r.studentId === studentId);
+      const record = session.records?.find((r) => r.studentId === studentId);
       if (record) {
         totalHeld += 1;
         if (record.status === 'PRESENT') {
@@ -129,14 +182,13 @@ export const attendanceService = {
   },
 
   // Calculate dynamic overall attendance stats for a single student across all enrolled subjects
-  calculateStudentOverallStats(studentId) {
-    const student = studentService.getById(studentId);
+  async calculateStudentOverallStats(studentId) {
+    const student = await studentService.getById(studentId);
     if (!student) {
       return { totalHeld: 0, attended: 0, percentage: 0, subjectBreakdown: [] };
     }
 
-    // Get subjects applicable to student's department & semester
-    const subjects = subjectService.getByDepartmentAndSemester(
+    const subjects = await subjectService.getByDepartmentAndSemester(
       student.department,
       student.semester
     );
@@ -145,8 +197,8 @@ export const attendanceService = {
     let totalAttended = 0;
     const subjectBreakdown = [];
 
-    subjects.forEach((subject) => {
-      const stats = this.calculateStudentSubjectStats(studentId, subject.id);
+    for (const subject of subjects) {
+      const stats = await this.calculateStudentSubjectStats(studentId, subject.id);
       totalHeld += stats.totalHeld;
       totalAttended += stats.attended;
 
@@ -161,7 +213,7 @@ export const attendanceService = {
         percentage: stats.percentage,
         isShortage: stats.totalHeld > 0 && stats.percentage < 75.0,
       });
-    });
+    }
 
     const percentage = totalHeld > 0 ? Number(((totalAttended / totalHeld) * 100).toFixed(1)) : 0;
 
@@ -175,19 +227,19 @@ export const attendanceService = {
     };
   },
 
-  // Get chronological history of attendance for a student
-  getStudentAttendanceHistory(studentId, filterSubjectId = null) {
-    const sessions = this.getAllSessions();
+  // Chronological attendance history for a student
+  async getStudentAttendanceHistory(studentId, filterSubjectId = null) {
+    const sessions = await this.getAllSessions();
     const history = [];
 
-    sessions.forEach((session) => {
+    for (const session of sessions) {
       if (filterSubjectId && filterSubjectId !== 'ALL' && session.subjectId !== filterSubjectId) {
-        return;
+        continue;
       }
 
-      const record = session.records.find((r) => r.studentId === studentId);
+      const record = session.records?.find((r) => r.studentId === studentId);
       if (record) {
-        const subject = subjectService.getById(session.subjectId);
+        const subject = await subjectService.getById(session.subjectId);
         history.push({
           sessionId: session.id,
           date: session.date,
@@ -198,23 +250,21 @@ export const attendanceService = {
           status: record.status,
         });
       }
-    });
+    }
 
-    // Sort newest to oldest
     history.sort((a, b) => new Date(b.date) - new Date(a.date));
     return history;
   },
 
-  // Calculate course register for faculty view
-  calculateCourseRegisterStats(subjectId) {
-    const subject = subjectService.getById(subjectId);
+  // Course register for faculty
+  async calculateCourseRegisterStats(subjectId) {
+    const subject = await subjectService.getById(subjectId);
     if (!subject) return { subject: null, sessionsCount: 0, studentStats: [] };
 
-    const sessions = this.getSessionsBySubject(subjectId);
+    const sessions = await this.getSessionsBySubject(subjectId);
     const sessionsCount = sessions.length;
 
-    // Get all students enrolled in this subject's department & semester
-    const allStudents = studentService.getAll();
+    const allStudents = await studentService.getAll();
     const enrolledStudents = allStudents.filter(
       (s) =>
         s.department.toUpperCase() === subject.department.toUpperCase() &&
@@ -225,7 +275,7 @@ export const attendanceService = {
     const studentStats = enrolledStudents.map((student) => {
       let attended = 0;
       sessions.forEach((session) => {
-        const rec = session.records.find((r) => r.studentId === student.id);
+        const rec = session.records?.find((r) => r.studentId === student.id);
         if (rec && rec.status === 'PRESENT') {
           attended += 1;
         }
@@ -250,7 +300,6 @@ export const attendanceService = {
       };
     });
 
-    // Sort alphabetically by rollNumber
     studentStats.sort((a, b) => a.student.rollNumber.localeCompare(b.student.rollNumber));
 
     return {

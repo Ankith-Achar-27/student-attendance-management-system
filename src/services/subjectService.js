@@ -1,35 +1,73 @@
 /**
- * Subject Service - Curriculum catalog & Faculty Assignment
+ * Subject Service (Phase 4 - Cloud Firestore Backed)
+ * Provides asynchronous CRUD operations for the curriculum catalog in Firestore.
  */
 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '../firebase/config';
 import { storageService, STORAGE_KEYS } from './storageService';
 
 export const subjectService = {
-  getAll() {
+  async getAll() {
+    if (isFirebaseConfigured && db) {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'subjects'));
+        const list = [];
+        querySnapshot.forEach((d) => {
+          list.push({ id: d.id, ...d.data() });
+        });
+        if (list.length > 0) {
+          storageService.setItem(STORAGE_KEYS.SUBJECTS, list);
+          return list;
+        }
+      } catch (err) {
+        console.warn('Firestore subjects fetch fallback:', err.message);
+      }
+    }
     return storageService.getItem(STORAGE_KEYS.SUBJECTS) || [];
   },
 
-  getById(id) {
-    const subjects = this.getAll();
+  async getById(id) {
+    if (isFirebaseConfigured && db && id) {
+      try {
+        const docSnap = await getDoc(doc(db, 'subjects', id));
+        if (docSnap.exists()) {
+          return { id: docSnap.id, ...docSnap.data() };
+        }
+      } catch (err) {
+        console.warn('Firestore subject getById fallback:', err.message);
+      }
+    }
+    const subjects = await this.getAll();
     return subjects.find((s) => s.id === id) || null;
   },
 
-  getByCode(code) {
+  async getByCode(code) {
     if (!code) return null;
-    const subjects = this.getAll();
-    return subjects.find(
-      (s) => s.code.toLowerCase() === code.trim().toLowerCase()
-    ) || null;
+    const subjects = await this.getAll();
+    return (
+      subjects.find(
+        (s) => s.code.toLowerCase() === code.trim().toLowerCase()
+      ) || null
+    );
   },
 
-  getByFaculty(facultyId) {
+  async getByFaculty(facultyId) {
     if (!facultyId) return [];
-    const subjects = this.getAll();
+    const subjects = await this.getAll();
     return subjects.filter((s) => s.facultyId === facultyId);
   },
 
-  getByDepartmentAndSemester(department, semester) {
-    const subjects = this.getAll();
+  async getByDepartmentAndSemester(department, semester) {
+    const subjects = await this.getAll();
     return subjects.filter((s) => {
       const matchDept = !department || s.department.toLowerCase() === department.toLowerCase();
       const matchSem = !semester || Number(s.semester) === Number(semester);
@@ -37,7 +75,7 @@ export const subjectService = {
     });
   },
 
-  validate(data, currentId = null) {
+  async validate(data, currentId = null) {
     if (!data.code?.trim()) {
       return { valid: false, error: 'Subject Code is required (e.g. CS501).' };
     }
@@ -54,10 +92,9 @@ export const subjectService = {
       return { valid: false, error: 'Valid course credits are required.' };
     }
 
-    const subjects = this.getAll();
+    const subjects = await this.getAll();
     const cleanCode = data.code.trim().toLowerCase();
 
-    // Check duplicate code
     const duplicate = subjects.find(
       (s) => s.id !== currentId && s.code.toLowerCase() === cleanCode
     );
@@ -68,13 +105,12 @@ export const subjectService = {
     return { valid: true };
   },
 
-  add(subjectData) {
-    const validation = this.validate(subjectData);
+  async add(subjectData) {
+    const validation = await this.validate(subjectData);
     if (!validation.valid) {
       return { success: false, error: validation.error };
     }
 
-    const subjects = this.getAll();
     const newSubject = {
       id: `subj-${Date.now()}`,
       code: subjectData.code.trim().toUpperCase(),
@@ -83,56 +119,80 @@ export const subjectService = {
       semester: parseInt(subjectData.semester, 10),
       credits: parseInt(subjectData.credits, 10),
       facultyId: subjectData.facultyId || null,
+      createdAt: new Date().toISOString(),
     };
 
-    subjects.push(newSubject);
-    storageService.setItem(STORAGE_KEYS.SUBJECTS, subjects);
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'subjects', newSubject.id), newSubject);
+      } catch (err) {
+        console.warn('Firestore subject write failed:', err.message);
+      }
+    }
+
+    const localSubjects = storageService.getItem(STORAGE_KEYS.SUBJECTS) || [];
+    localSubjects.push(newSubject);
+    storageService.setItem(STORAGE_KEYS.SUBJECTS, localSubjects);
+
     return { success: true, data: newSubject };
   },
 
-  update(id, subjectData) {
-    const validation = this.validate(subjectData, id);
+  async update(id, subjectData) {
+    const validation = await this.validate(subjectData, id);
     if (!validation.valid) {
       return { success: false, error: validation.error };
     }
 
-    const subjects = this.getAll();
-    const index = subjects.findIndex((s) => s.id === id);
-    if (index === -1) {
-      return { success: false, error: 'Subject record not found.' };
-    }
-
     const updatedSubject = {
-      ...subjects[index],
+      id,
       code: subjectData.code.trim().toUpperCase(),
       name: subjectData.name.trim(),
       department: subjectData.department.trim().toUpperCase(),
       semester: parseInt(subjectData.semester, 10),
       credits: parseInt(subjectData.credits, 10),
-      facultyId: subjectData.facultyId !== undefined ? subjectData.facultyId : subjects[index].facultyId,
+      facultyId: subjectData.facultyId !== undefined ? subjectData.facultyId : null,
+      updatedAt: new Date().toISOString(),
     };
 
-    subjects[index] = updatedSubject;
-    storageService.setItem(STORAGE_KEYS.SUBJECTS, subjects);
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'subjects', id), updatedSubject);
+      } catch (err) {
+        console.warn('Firestore subject update failed:', err.message);
+      }
+    }
+
+    const localSubjects = storageService.getItem(STORAGE_KEYS.SUBJECTS) || [];
+    const index = localSubjects.findIndex((s) => s.id === id);
+    if (index !== -1) {
+      localSubjects[index] = { ...localSubjects[index], ...updatedSubject };
+      storageService.setItem(STORAGE_KEYS.SUBJECTS, localSubjects);
+    }
+
     return { success: true, data: updatedSubject };
   },
 
-  assignFaculty(subjectId, facultyId) {
-    const subjects = this.getAll();
-    const index = subjects.findIndex((s) => s.id === subjectId);
-    if (index === -1) {
+  async assignFaculty(subjectId, facultyId) {
+    const subject = await this.getById(subjectId);
+    if (!subject) {
       return { success: false, error: 'Subject not found.' };
     }
-
-    subjects[index].facultyId = facultyId || null;
-    storageService.setItem(STORAGE_KEYS.SUBJECTS, subjects);
-    return { success: true, data: subjects[index] };
+    return await this.update(subjectId, { ...subject, facultyId: facultyId || null });
   },
 
-  delete(id) {
-    const subjects = this.getAll();
-    const filtered = subjects.filter((s) => s.id !== id);
+  async delete(id) {
+    if (isFirebaseConfigured && db) {
+      try {
+        await deleteDoc(doc(db, 'subjects', id));
+      } catch (err) {
+        console.warn('Firestore subject delete failed:', err.message);
+      }
+    }
+
+    const localSubjects = storageService.getItem(STORAGE_KEYS.SUBJECTS) || [];
+    const filtered = localSubjects.filter((s) => s.id !== id);
     storageService.setItem(STORAGE_KEYS.SUBJECTS, filtered);
+
     return { success: true };
   },
 };

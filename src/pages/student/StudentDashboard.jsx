@@ -20,15 +20,21 @@ export const StudentDashboard = () => {
     loadStudentStats();
   }, [activeUser]);
 
-  const loadStudentStats = () => {
-    const studentId = activeUser?.entity?.id || 'stud-042';
-    const computed = attendanceService.calculateStudentOverallStats(studentId);
-    setStats(computed);
+  const loadStudentStats = async () => {
+    const studentId = activeUser?.entityId || activeUser?.entity?.id || 'stud-042';
+    const computed = await attendanceService.calculateStudentOverallStats(studentId);
+    setStats(computed || {
+      totalHeld: 0,
+      attended: 0,
+      percentage: 0,
+      isShortage: false,
+      subjectBreakdown: [],
+    });
 
     // Build faculty lookup map
-    const allFaculty = facultyService.getAll();
+    const allFaculty = await facultyService.getAll();
     const map = {};
-    allFaculty.forEach((f) => {
+    (allFaculty || []).forEach((f) => {
       map[f.id] = f.name;
     });
     setFacultyMap(map);

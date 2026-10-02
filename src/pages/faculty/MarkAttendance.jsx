@@ -9,43 +9,37 @@ export const MarkAttendance = () => {
   const { activeUser } = useRole();
   const [assignedSubjects, setAssignedSubjects] = useState([]);
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [selectedSlot, setSelectedSlot] = useState('Slot 2 (10:00 - 11:00 AM)');
 
   const [studentRoster, setStudentRoster] = useState([]);
   const [notice, setNotice] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadSubjects();
-  }, [activeUser]);
-
-  const loadSubjects = () => {
+  const loadSubjects = React.useCallback(async () => {
     const facultyId = activeUser?.entityId || activeUser?.entity?.id;
-    const subs = facultyId ? subjectService.getByFaculty(facultyId) : [];
+    const subs = facultyId ? await subjectService.getByFaculty(facultyId) : [];
 
-    setAssignedSubjects(subs);
-    if (subs.length > 0) {
+    setAssignedSubjects(subs || []);
+    if (subs && subs.length > 0) {
       setSelectedSubjectId(subs[0].id);
     } else {
       setSelectedSubjectId('');
       setStudentRoster([]);
     }
-  };
+  }, [activeUser]);
 
   useEffect(() => {
-    if (selectedSubjectId) {
-      loadRosterForSubject(selectedSubjectId);
-    }
-  }, [selectedSubjectId]);
+    loadSubjects();
+  }, [loadSubjects]);
 
-  const loadRosterForSubject = (subjId) => {
-    const subject = subjectService.getById(subjId);
+  const loadRosterForSubject = React.useCallback(async (subjId) => {
+    const subject = await subjectService.getById(subjId);
     if (!subject) return;
 
     // Load active students belonging to this department and semester
-    const allStudents = studentService.getAll();
-    const enrolled = allStudents.filter(
+    const allStudents = await studentService.getAll();
+    const enrolled = (allStudents || []).filter(
       (s) =>
         s.department.toUpperCase() === subject.department.toUpperCase() &&
         Number(s.semester) === Number(subject.semester) &&
@@ -64,7 +58,13 @@ export const MarkAttendance = () => {
     initialRoster.sort((a, b) => a.rollNumber.localeCompare(b.rollNumber));
     setStudentRoster(initialRoster);
     setNotice(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (selectedSubjectId) {
+      loadRosterForSubject(selectedSubjectId);
+    }
+  }, [selectedSubjectId, loadRosterForSubject]);
 
   const toggleStudentStatus = (studentId) => {
     setStudentRoster((prev) =>
@@ -80,7 +80,7 @@ export const MarkAttendance = () => {
     setStudentRoster((prev) => prev.map((s) => ({ ...s, status })));
   };
 
-  const handleSubmitAttendance = (e) => {
+  const handleSubmitAttendance = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setNotice(null);
@@ -92,7 +92,7 @@ export const MarkAttendance = () => {
       status: s.status,
     }));
 
-    const result = attendanceService.saveSession({
+    const result = await attendanceService.saveSession({
       subjectId: selectedSubjectId,
       facultyId,
       date: selectedDate,

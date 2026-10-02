@@ -6,6 +6,7 @@ import { storageService } from '../../services/storageService';
 
 export const ManageFaculty = () => {
   const [facultyList, setFacultyList] = useState([]);
+  const [subjectList, setSubjectList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modal and Form States
@@ -22,13 +23,18 @@ export const ManageFaculty = () => {
   const [formError, setFormError] = useState('');
   const [notice, setNotice] = useState(null);
 
-  useEffect(() => {
-    loadFaculty();
+  const loadFaculty = React.useCallback(async () => {
+    const [list, subs] = await Promise.all([
+      facultyService.getAll(),
+      subjectService.getAll(),
+    ]);
+    setFacultyList(list || []);
+    setSubjectList(subs || []);
   }, []);
 
-  const loadFaculty = () => {
-    setFacultyList(facultyService.getAll());
-  };
+  useEffect(() => {
+    loadFaculty();
+  }, [loadFaculty]);
 
   const openAddModal = () => {
     setEditingFacultyId(null);
@@ -58,15 +64,15 @@ export const ManageFaculty = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
 
     let result;
     if (editingFacultyId) {
-      result = facultyService.update(editingFacultyId, formData);
+      result = await facultyService.update(editingFacultyId, formData);
     } else {
-      result = facultyService.add(formData);
+      result = await facultyService.add(formData);
     }
 
     if (!result.success) {
@@ -75,7 +81,7 @@ export const ManageFaculty = () => {
     }
 
     setIsModalOpen(false);
-    loadFaculty();
+    await loadFaculty();
     setNotice({
       type: 'info',
       message: editingFacultyId
@@ -84,10 +90,10 @@ export const ManageFaculty = () => {
     });
   };
 
-  const handleToggleStatus = (id) => {
-    const res = facultyService.toggleStatus(id);
+  const handleToggleStatus = async (id) => {
+    const res = await facultyService.toggleStatus(id);
     if (res.success) {
-      loadFaculty();
+      await loadFaculty();
       setNotice({
         type: 'info',
         message: `Status updated for ${res.data.name} to ${res.data.status}.`,
@@ -95,16 +101,17 @@ export const ManageFaculty = () => {
     }
   };
 
-  const handleDelete = (id, name) => {
-    facultyService.delete(id);
-    loadFaculty();
+  const handleDelete = async (id, name) => {
+    await facultyService.delete(id);
+    await loadFaculty();
     setNotice({
       type: 'warning',
       message: `Faculty record for ${name} has been deleted.`,
     });
   };
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
+    const allSubjects = await subjectService.getAll();
     const headers = ['Employee ID', 'Full Name', 'Department', 'Designation', 'Official Email', 'Assigned Courses', 'Status'];
     const rows = filteredFaculty.map((f) => [
       f.employeeId,
@@ -112,7 +119,7 @@ export const ManageFaculty = () => {
       f.department,
       f.designation,
       f.email,
-      subjectService.getByFaculty(f.id).length,
+      allSubjects.filter((s) => s.facultyId === f.id).length,
       f.status,
     ]);
     storageService.exportToCSV('Faculty_Directory_Export', headers, rows);
@@ -196,7 +203,7 @@ export const ManageFaculty = () => {
                 </tr>
               ) : (
                 filteredFaculty.map((faculty) => {
-                  const assignedCount = subjectService.getByFaculty(faculty.id).length;
+                  const assignedCount = subjectList.filter((s) => s.facultyId === faculty.id).length;
                   return (
                     <tr key={faculty.id}>
                       <td><strong>{faculty.employeeId}</strong></td>

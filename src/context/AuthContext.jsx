@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService, ROLES } from '../services/authService';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -8,18 +8,21 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if session exists in localStorage on mount
-    const savedUser = authService.getCurrentUser();
-    if (savedUser) {
-      setUser(savedUser);
-    }
+    // Subscribe to Firebase Authentication state observer
+    const unsubscribe = authService.subscribeToAuthState((authUser) => {
+      setUser(authUser);
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const login = async (email, password) => {
     setLoading(true);
-    // Simulate brief realistic institutional auth verification
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const result = authService.login(email, password);
+    const result = await authService.login(email, password);
     setLoading(false);
 
     if (result.success) {
@@ -28,8 +31,8 @@ export const AuthProvider = ({ children }) => {
     return result;
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
   };
 

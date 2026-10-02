@@ -13,39 +13,42 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const redirectUser = React.useCallback(
+    (role) => {
+      // Check if there was an intended route before redirect
+      const fromPath = location.state?.from?.pathname;
+      if (fromPath && fromPath !== '/login') {
+        if (role === ROLES.ADMIN && fromPath.startsWith('/admin')) {
+          navigate(fromPath, { replace: true });
+          return;
+        }
+        if (role === ROLES.FACULTY && fromPath.startsWith('/faculty')) {
+          navigate(fromPath, { replace: true });
+          return;
+        }
+        if (role === ROLES.STUDENT && fromPath.startsWith('/student')) {
+          navigate(fromPath, { replace: true });
+          return;
+        }
+      }
+
+      if (role === ROLES.ADMIN) {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (role === ROLES.FACULTY) {
+        navigate('/faculty/dashboard', { replace: true });
+      } else if (role === ROLES.STUDENT) {
+        navigate('/student/dashboard', { replace: true });
+      }
+    },
+    [location.state, navigate]
+  );
+
   // If already logged in, redirect to their role's dashboard
   useEffect(() => {
     if (isAuthenticated && user) {
       redirectUser(user.role);
     }
-  }, [isAuthenticated, user]);
-
-  const redirectUser = (role) => {
-    // Check if there was an intended route before redirect
-    const fromPath = location.state?.from?.pathname;
-    if (fromPath && fromPath !== '/login') {
-      if (role === ROLES.ADMIN && fromPath.startsWith('/admin')) {
-        navigate(fromPath, { replace: true });
-        return;
-      }
-      if (role === ROLES.FACULTY && fromPath.startsWith('/faculty')) {
-        navigate(fromPath, { replace: true });
-        return;
-      }
-      if (role === ROLES.STUDENT && fromPath.startsWith('/student')) {
-        navigate(fromPath, { replace: true });
-        return;
-      }
-    }
-
-    if (role === ROLES.ADMIN) {
-      navigate('/admin/dashboard', { replace: true });
-    } else if (role === ROLES.FACULTY) {
-      navigate('/faculty/dashboard', { replace: true });
-    } else if (role === ROLES.STUDENT) {
-      navigate('/student/dashboard', { replace: true });
-    }
-  };
+  }, [isAuthenticated, user, redirectUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,13 +70,6 @@ export const LoginPage = () => {
     } else {
       redirectUser(result.user.role);
     }
-  };
-
-  // Helper for reviewers to quickly test any role
-  const fillCredentials = (demoEmail) => {
-    setEmail(demoEmail);
-    setPassword('password123');
-    setErrorMessage('');
   };
 
   return (
@@ -150,46 +146,6 @@ export const LoginPage = () => {
                 </Button>
               </div>
             </form>
-
-            {/* Development Mock Accounts Assistant */}
-            <div className="demo-credentials-box">
-              <div className="demo-credentials-title">
-                <span>Quick Development Accounts:</span>
-                <span style={{ fontSize: '10px', color: '#94a3b8' }}>Dev Phase 3</span>
-              </div>
-              <p style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px' }}>
-                Click any mock account below to auto-fill (password: <code>password123</code>):
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <button
-                  type="button"
-                  className="demo-badge-btn"
-                  onClick={() => fillCredentials('admin@college.edu')}
-                  style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}
-                >
-                  <span>🏛️ <strong>Admin:</strong> admin@college.edu</span>
-                  <span style={{ color: '#2563eb' }}>Fill Admin</span>
-                </button>
-                <button
-                  type="button"
-                  className="demo-badge-btn"
-                  onClick={() => fillCredentials('faculty@college.edu')}
-                  style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}
-                >
-                  <span>👨‍🏫 <strong>Faculty:</strong> faculty@college.edu</span>
-                  <span style={{ color: '#2563eb' }}>Fill Faculty</span>
-                </button>
-                <button
-                  type="button"
-                  className="demo-badge-btn"
-                  onClick={() => fillCredentials('student@college.edu')}
-                  style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}
-                >
-                  <span>🎓 <strong>Student:</strong> student@college.edu</span>
-                  <span style={{ color: '#2563eb' }}>Fill Student</span>
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="login-footer-text">

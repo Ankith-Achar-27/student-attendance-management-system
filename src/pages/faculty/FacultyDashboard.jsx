@@ -19,16 +19,16 @@ export const FacultyDashboard = () => {
     loadFacultyData();
   }, [activeUser]);
 
-  const loadFacultyData = () => {
+  const loadFacultyData = async () => {
     const facultyId = activeUser?.entityId || activeUser?.entity?.id;
-    const assignedSubjects = facultyId ? subjectService.getByFaculty(facultyId) : [];
+    const assignedSubjects = facultyId ? await subjectService.getByFaculty(facultyId) : [];
 
     let totalSessionsHeld = 0;
     let totalPctSum = 0;
     let courseWithStats = [];
 
-    assignedSubjects.forEach((sub) => {
-      const reg = attendanceService.calculateCourseRegisterStats(sub.id);
+    for (const sub of assignedSubjects) {
+      const reg = await attendanceService.calculateCourseRegisterStats(sub.id);
       totalSessionsHeld += reg.sessionsCount;
 
       let avgPct = 0;
@@ -48,7 +48,7 @@ export const FacultyDashboard = () => {
         sessionsCount: reg.sessionsCount,
         avgAttendance: avgPct,
       });
-    });
+    }
 
     const overallAverage = assignedSubjects.length > 0
       ? Number((totalPctSum / assignedSubjects.length).toFixed(1))

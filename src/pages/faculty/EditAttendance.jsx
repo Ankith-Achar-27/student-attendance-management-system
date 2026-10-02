@@ -16,15 +16,11 @@ export const EditAttendance = () => {
   const [records, setRecords] = useState([]);
   const [notice, setNotice] = useState(null);
 
-  useEffect(() => {
-    loadSubjects();
-  }, [activeUser]);
-
-  const loadSubjects = () => {
+  const loadSubjects = React.useCallback(async () => {
     const facultyId = activeUser?.entityId || activeUser?.entity?.id;
-    const subs = facultyId ? subjectService.getByFaculty(facultyId) : [];
-    setAssignedSubjects(subs);
-    if (subs.length > 0) {
+    const subs = facultyId ? await subjectService.getByFaculty(facultyId) : [];
+    setAssignedSubjects(subs || []);
+    if (subs && subs.length > 0) {
       setSelectedSubjectId(subs[0].id);
     } else {
       setSelectedSubjectId('');
@@ -32,40 +28,41 @@ export const EditAttendance = () => {
       setActiveSession(null);
       setRecords([]);
     }
-  };
+  }, [activeUser]);
 
   useEffect(() => {
-    if (selectedSubjectId) {
-      const sessions = attendanceService.getSessionsBySubject(selectedSubjectId);
-      // Sort newest date first
-      sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setAvailableSessions(sessions);
-      if (sessions.length > 0) {
-        setSelectedSessionId(sessions[0].id);
-      } else {
-        setSelectedSessionId('');
-        setActiveSession(null);
-        setRecords([]);
+    loadSubjects();
+  }, [loadSubjects]);
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      if (selectedSubjectId) {
+        const sessions = await attendanceService.getSessionsBySubject(selectedSubjectId);
+        // Sort newest date first
+        const sorted = (sessions || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        setAvailableSessions(sorted);
+        if (sorted.length > 0) {
+          setSelectedSessionId(sorted[0].id);
+        } else {
+          setSelectedSessionId('');
+          setActiveSession(null);
+          setRecords([]);
+        }
       }
-    }
+    };
+    fetchSessions();
   }, [selectedSubjectId]);
 
-  useEffect(() => {
-    if (selectedSessionId) {
-      loadSessionDetails(selectedSessionId);
-    }
-  }, [selectedSessionId]);
-
-  const loadSessionDetails = (sessId) => {
-    const session = attendanceService.getSessionById(sessId);
+  const loadSessionDetails = React.useCallback(async (sessId) => {
+    const session = await attendanceService.getSessionById(sessId);
     if (!session) return;
 
     setActiveSession(session);
 
     // Map each record with student info
-    const students = studentService.getAll();
-    const mapped = session.records.map((r) => {
-      const stud = students.find((s) => s.id === r.studentId);
+    const students = await studentService.getAll();
+    const mapped = (session.records || []).map((r) => {
+      const stud = (students || []).find((s) => s.id === r.studentId);
       return {
         studentId: r.studentId,
         rollNumber: stud ? stud.rollNumber : 'UNKNOWN',
@@ -79,7 +76,15 @@ export const EditAttendance = () => {
     mapped.sort((a, b) => a.rollNumber.localeCompare(b.rollNumber));
     setRecords(mapped);
     setNotice(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (selectedSessionId) {
+      loadSessionDetails(selectedSessionId);
+    }
+  }, [selectedSessionId, loadSessionDetails]);
+
+
 
   const toggleRecord = (studentId) => {
     setRecords((prev) =>
@@ -97,7 +102,7 @@ export const EditAttendance = () => {
     );
   };
 
-  const handleSaveCorrections = (e) => {
+  const handleSaveCorrections = async (e) => {
     e.preventDefault();
     if (!activeSession) return;
 
@@ -106,7 +111,7 @@ export const EditAttendance = () => {
       status: r.currentStatus,
     }));
 
-    const result = attendanceService.saveSession({
+    const result = await attendanceService.saveSession({
       id: activeSession.id,
       subjectId: activeSession.subjectId,
       facultyId: activeSession.facultyId,
@@ -121,7 +126,7 @@ export const EditAttendance = () => {
     }
 
     // Reload to reset originalStatus
-    loadSessionDetails(activeSession.id);
+    await loadSessionDetails(activeSession.id);
     const modifiedCount = records.filter((r) => r.modified).length;
     setNotice({
       type: 'info',
