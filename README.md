@@ -1,32 +1,82 @@
 # Student Attendance Management System (SAMS)
+
 ### Malnad College of Engineering, Hassan
 **Department of Computer Science and Engineering**
 
-A practical, institutional web application designed for **Malnad College of Engineering (MCE), Hassan** to monitor, record, and audit student attendance with role-based access control for **Administrators**, **Faculty**, and **Students**.
+A practical institutional web application for managing, monitoring, and auditing student attendance with role-based access for **Administrators, Faculty, and Students**.
 
-Built as a college **Cloud Computing** project foundation using React and Vite, structured with an abstract service layer designed for seamless integration with Firebase Authentication and Cloud Firestore.
+The project is developed as a **Cloud Computing** application using **React + Vite**, with a service-layer architecture designed for **Firebase Authentication, Cloud Firestore, Firestore Security Rules, and Firebase Hosting**.
 
 ---
 
-## 🏛️ System Features & Role Capabilities
+## 🏛️ System Features
 
-### 1. Administration (Academic Affairs & Records)
-* **Student Directory & Enrollment:** Register new students, update batch details, toggle active/inactive status, and export rosters to CSV.
-* **Faculty Directory:** Maintain instructional staff records, departments, and course load assignments.
-* **Curriculum Subjects Catalog:** Configure course offerings, credit allocations, and assign faculty instructors.
-* **Institutional Defaulter Audit:** Live calculation of student attendance against institutional examination thresholds (e.g. $<75\%$) with customizable filters and CSV report export.
-* **Campus-Wide Metrics:** Aggregated attendance metrics across all engineering departments.
+### 1. Administration
 
-### 2. Faculty (Instructional Staff - Department of CSE)
-* **Instructional Dashboard:** Overview of allocated semester subjects, enrollment counts, and batch averages.
-* **Mark Attendance Roll Call:** Select assigned subject, date, and lecture slot (Periods 1–5 or Lab) to mark students Present or Absent with batch action shortcuts. Duplicate prevention prevents accidental double submissions for the same slot.
-* **Edit Historical Attendance:** Rectify attendance records for past sessions with change tracking.
-* **Course Registers:** Cumulative attendance registers calculating individual student attendance percentages and compliance statuses (`Satisfactory`, `Borderline`, `Shortage`).
+- Student directory and enrollment management
+- Add, update, and manage student records
+- Faculty directory management
+- Subject and curriculum management
+- Assign subjects to faculty
+- Institutional attendance/defaulter reports
+- Attendance percentage calculations
+- CSV report export
+- Campus-wide attendance metrics
 
-### 3. Student (Self-Service Portal)
-* **Attendance Overview:** Overall cumulative attendance percentage, classes held vs. attended, and statutory examination eligibility badge.
-* **Subject-Wise Breakdown:** Per-course metrics including credits, assigned faculty, held/attended count, and compliance indicators.
-* **Chronological Attendance Log:** Detailed historical log of all past lecture roll calls with subject-wise filtering.
+### 2. Faculty
+
+- Faculty dashboard
+- View assigned subjects
+- Mark student attendance
+- Present/Absent batch actions
+- Duplicate attendance-session prevention
+- Edit historical attendance
+- Course attendance registers
+- Student-wise attendance percentages
+- Attendance compliance status
+
+### 3. Student
+
+- Personal attendance dashboard
+- Overall attendance percentage
+- Classes held vs. classes attended
+- Subject-wise attendance
+- Assigned faculty information
+- Attendance history
+- Detailed chronological attendance log
+- Examination eligibility status
+
+---
+
+## ☁️ Cloud Architecture
+
+The application is designed as a cloud-based web application using Firebase services.
+
+```text
+                    Internet
+                       |
+                       v
+              +-------------------+
+              |  Firebase Hosting |
+              |   React Frontend  |
+              +---------+---------+
+                        |
+                        v
+              +-------------------+
+              | Firebase Services |
+              +---------+---------+
+                        |
+          +-------------+-------------+
+          |             |             |
+          v             v             v
+   Authentication   Cloud Firestore   Security Rules
+          |             |             |
+          v             v             v
+       Users       Attendance Data    Role-based
+       Login       Student Data       Access Control
+                   Faculty Data
+                   Subject Data
+```
 
 ---
 
@@ -66,9 +116,13 @@ student-attendance-management-system/
 │   │   ├── common/           # Badge, Card, Button, Modal, AlertBanner, ProtectedRoute
 │   │   └── layout/           # Institutional Header, Sidebar, AppLayout
 │   ├── context/
-│   │   └── AuthContext.jsx   # Authentication context & session persistence
+│   │   ├── AuthContext.jsx   # Authentication context & session persistence
+│   │   └── RoleContext.jsx   # Role state management
 │   ├── data/
-│   │   └── seedData.js       # Realistic institutional seed dataset
+│   │   └── seedData.js       # Realistic MCE institutional seed dataset
+│   ├── firebase/
+│   │   ├── config.js         # Firebase Cloud SDK configuration
+│   │   └── seedFirestore.js  # Controlled Firestore cloud seeding utility
 │   ├── pages/
 │   │   ├── admin/            # AdminDashboard, ManageStudents, ManageFaculty, etc.
 │   │   ├── faculty/          # FacultyDashboard, MarkAttendance, EditAttendance, etc.
@@ -76,15 +130,17 @@ student-attendance-management-system/
 │   │   └── auth/             # LoginPage
 │   ├── services/
 │   │   ├── storageService.js # LocalStorage repository & CSV generator
-│   │   ├── authService.js    # Local authentication layer
-│   │   ├── studentService.js # Student CRUD & validation
-│   │   ├── facultyService.js # Faculty CRUD & uniqueness validation
+│   │   ├── authService.js    # Firebase Auth & local fallback
+│   │   ├── studentService.js # Student CRUD & Firestore synchronization
+│   │   ├── facultyService.js # Faculty CRUD & Firestore synchronization
 │   │   ├── subjectService.js # Curriculum catalog & faculty assignments
-│   │   ├── attendanceService.js # Dynamic percentage calculations & sessions
+│   │   ├── attendanceService.js # Dynamic attendance percentage engine
 │   │   └── reportService.js  # Defaulter audits & campus-wide summaries
 │   ├── App.jsx               # Route definitions & ProtectedRoute tree
 │   ├── index.css             # Institutional academic design system
 │   └── main.jsx
+├── firestore.rules           # Production-grade Firestore security rules
+├── .env.example              # Environment variables template
 ├── package.json
 └── vite.config.js
 ```
@@ -115,6 +171,12 @@ npm install
 npm run dev
 ```
 Navigate to `http://localhost:5173/` in your browser.
+
+### Cloud Configuration (Optional)
+To connect with your live Google Cloud Firebase project:
+1. Copy `.env.example` to `.env`
+2. Populate the `VITE_FIREBASE_*` variables with your Firebase console project keys
+3. Restart Vite (`npm run dev`)
 
 ### Production Build
 ```bash
