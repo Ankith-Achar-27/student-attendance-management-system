@@ -23,10 +23,27 @@ export const Header = () => {
   return (
     <header className="app-header">
       <div className="header-brand">
-        <div className="brand-crest" title="Malnad College of Engineering Crest">MCE</div>
-        <div className="brand-text">
-          <h1>Malnad College of Engineering, Hassan</h1>
-          <p>Department of Computer Science and Engineering &bull; SAMS</p>
+        <div className="header-crest-container">
+          <img
+            src="/assets/mce-logo.png"
+            alt="Malnad College of Engineering logo"
+            className="header-crest-img"
+          />
+        </div>
+        <div className="brand-text-container">
+          <div className="brand-institution">
+            <h1 className="inst-title">Malnad College of Engineering</h1>
+            <div className="inst-meta">
+              <span className="inst-autonomous">An Autonomous Institution</span>
+              <span className="meta-separator" aria-hidden="true">&bull;</span>
+              <span className="inst-loc">HASSAN - 573202, KARNATAKA</span>
+            </div>
+          </div>
+          <div className="brand-divider" aria-hidden="true" />
+          <div className="brand-application">
+            <div className="app-title">Student Attendance Management System</div>
+            <div className="dept-title">Department of Computer Science and Engineering</div>
+          </div>
         </div>
       </div>
 

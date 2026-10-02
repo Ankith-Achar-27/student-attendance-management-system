@@ -54,7 +54,7 @@ export const AdminDashboard = () => {
           <div>
             <h1 className="page-title">Institutional Overview & Administration</h1>
             <p className="page-subtitle">
-              Malnad College of Engineering, Hassan &bull; Dept. of CSE &bull; AY 2026–2027
+              Malnad College of Engineering, Hassan &bull; Department of Computer Science and Engineering &bull; AY 2026–2027
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>

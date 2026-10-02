@@ -51,7 +51,7 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
   /* Layout */
-  --header-height: 56px;
+  --header-height: 68px;
   --sidebar-width: 240px;
 
   /* Elevation */
@@ -91,51 +91,117 @@ body {
 
 /* Top Institutional Header */
 .app-header {
-  height: var(--header-height);
+  min-height: var(--header-height);
   background-color: var(--color-header-bg);
   color: var(--color-header-text);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 8px 24px;
   border-bottom: 1px solid #1e293b;
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: 16px;
 }
 
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.brand-crest {
-  width: 32px;
-  height: 32px;
-  background-color: #1e3a8a;
-  border: 1px solid #3b82f6;
+.header-crest-container {
+  width: 48px;
+  height: 48px;
+  background-color: #ffffff;
   border-radius: var(--radius-sm);
+  padding: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
-.brand-text h1 {
+.header-crest-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-text-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-institution {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.inst-title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #f8fafc;
   line-height: 1.2;
   letter-spacing: -0.2px;
+  margin: 0;
 }
 
-.brand-text p {
+.inst-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.inst-autonomous {
+  color: #bfdbfe;
+  font-weight: 500;
+}
+
+.inst-loc {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.meta-separator {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 34px;
+  background-color: #334155;
+  flex-shrink: 0;
+}
+
+.brand-application {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.app-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.2;
+}
+
+.dept-title {
   font-size: 11px;
   color: #94a3b8;
-  line-height: 1;
+  line-height: 1.3;
+  margin-top: 2px;
 }
 
 .header-actions {
@@ -657,10 +723,10 @@ body {
 
 .login-top-banner {
   background-color: var(--color-header-bg);
-  height: 56px;
+  min-height: var(--header-height);
   display: flex;
   align-items: center;
-  padding: 0 24px;
+  padding: 8px 24px;
   border-bottom: 1px solid #1e293b;
 }
 
@@ -683,25 +749,46 @@ body {
 }
 
 .login-card-header {
-  padding: 24px 28px 16px 28px;
+  padding: 24px 28px 18px 28px;
   border-bottom: 1px solid var(--color-border);
   text-align: center;
   background-color: #ffffff;
 }
 
-.login-crest-icon {
-  width: 44px;
-  height: 44px;
-  background-color: #1e3a8a;
-  border: 1px solid #3b82f6;
-  border-radius: var(--radius-sm);
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 18px;
+.login-crest-container {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 12px auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 12px auto;
+}
+
+.login-crest-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.login-card-inst {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-top: 4px;
+}
+
+.login-card-dept {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.login-card-app {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-light);
+  margin-top: 2px;
 }
 
 .login-card-header h2 {
@@ -767,7 +854,39 @@ body {
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .brand-text-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+  .brand-divider {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
+  .app-header {
+    padding: 8px 16px;
+    height: auto;
+    min-height: var(--header-height);
+  }
+  .inst-title {
+    font-size: 13px;
+  }
+  .inst-meta {
+    font-size: 10px;
+  }
+  .app-title {
+    font-size: 12px;
+  }
+  .dept-title {
+    font-size: 10px;
+  }
+  .header-crest-container {
+    width: 40px;
+    height: 40px;
+  }
   .app-body {
     flex-direction: column;
   }
@@ -778,5 +897,18 @@ body {
   }
   .app-content {
     padding: 16px;
+  }
+}
+
+@media (max-width: 540px) {
+  .inst-meta {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .meta-separator {
+    display: none;
+  }
+  .dept-title {
+    display: none;
   }
 }
