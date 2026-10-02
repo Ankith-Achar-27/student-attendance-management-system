@@ -104,7 +104,7 @@ export const AdminReports = () => {
       <div className="alert-box alert-warning">
         <span>⚠️</span>
         <div>
-          <strong>Statutory University Rule:</strong> Students with cumulative attendance below 75% are ineligible for final semester examinations without medical board clearance.
+          <strong>Statutory Academic Regulation:</strong> Students with cumulative attendance below 75% are ineligible for final semester examinations under Malnad College of Engineering academic regulations.
         </div>
       </div>
 

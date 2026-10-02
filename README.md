@@ -1,21 +1,23 @@
-# Student Attendance Management System
+# Student Attendance Management System (SAMS)
+### Malnad College of Engineering, Hassan
+**Department of Computer Science and Engineering**
 
-A practical, institutional web application designed for academic colleges to monitor, record, and audit student attendance with role-based access for **Administrators**, **Faculty**, and **Students**.
+A practical, institutional web application designed for **Malnad College of Engineering (MCE), Hassan** to monitor, record, and audit student attendance with role-based access control for **Administrators**, **Faculty**, and **Students**.
 
-Built as a college **Cloud Computing** project foundation using React and Vite, structured with an abstract service layer designed for seamless integration with Firebase Authentication and Firestore.
+Built as a college **Cloud Computing** project foundation using React and Vite, structured with an abstract service layer designed for seamless integration with Firebase Authentication and Cloud Firestore.
 
 ---
 
 ## 🏛️ System Features & Role Capabilities
 
-### 1. Administration (Academic Office)
+### 1. Administration (Academic Affairs & Records)
 * **Student Directory & Enrollment:** Register new students, update batch details, toggle active/inactive status, and export rosters to CSV.
 * **Faculty Directory:** Maintain instructional staff records, departments, and course load assignments.
 * **Curriculum Subjects Catalog:** Configure course offerings, credit allocations, and assign faculty instructors.
-* **Institutional Defaulter Audit:** Live calculation of student attendance against university examination thresholds (e.g. $<75\%$) with customizable filters and CSV report export.
+* **Institutional Defaulter Audit:** Live calculation of student attendance against institutional examination thresholds (e.g. $<75\%$) with customizable filters and CSV report export.
 * **Campus-Wide Metrics:** Aggregated attendance metrics across all engineering departments.
 
-### 2. Faculty (Instructional Staff)
+### 2. Faculty (Instructional Staff - Department of CSE)
 * **Instructional Dashboard:** Overview of allocated semester subjects, enrollment counts, and batch averages.
 * **Mark Attendance Roll Call:** Select assigned subject, date, and lecture slot (Periods 1–5 or Lab) to mark students Present or Absent with batch action shortcuts. Duplicate prevention prevents accidental double submissions for the same slot.
 * **Edit Historical Attendance:** Rectify attendance records for past sessions with change tracking.
@@ -40,17 +42,17 @@ Designed to look like an authentic, human-engineered institutional academic ERP 
 
 ## 🔐 Authentication & Demo Accounts
 
-The project includes a local authentication service with role-based route protection (`ProtectedRoute`) and persistent session management in `localStorage`.
+The project includes an authentication service with role-based route protection (`ProtectedRoute`), Firebase Auth integration, and graceful local session fallback.
 
 All demo accounts use the development password: **`password123`**
 
-| Role | Institutional Email | Password | Linked Entity Profile |
+| Role | Institutional Demo Email | Password | Linked Entity Profile |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@college.edu` | `password123` | System Administrator (`ADM-01`) |
-| **Faculty** | `faculty@college.edu` | `password123` | Dr. Sarah Jenkins (`fac-104`, CSE Dept) |
-| **Student** | `student@college.edu` | `password123` | Rahul Sharma (`stud-042`, B.Tech CSE Sem 5) |
+| **Admin** | `admin@mce-sams.local` | `password123` | System Administrator (`ADM-01`) |
+| **Faculty** | `faculty@mce-sams.local` | `password123` | Dr. Sarah Jenkins (`fac-104`, Dept of CSE) |
+| **Student** | `student@mce-sams.local` | `password123` | Rahul Sharma (`stud-042`, B.E. CSE Sem 5) |
 
-*(Note: The login page includes quick one-click fill buttons for each demo account for rapid review).*
+*(Note: The login page includes quick one-click autofill buttons for each demo account for rapid review).*
 
 ---
 

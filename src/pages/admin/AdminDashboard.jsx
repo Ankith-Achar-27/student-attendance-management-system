@@ -54,7 +54,7 @@ export const AdminDashboard = () => {
           <div>
             <h1 className="page-title">Institutional Overview & Administration</h1>
             <p className="page-subtitle">
-              Academic Year 2026–2027 &bull; Central Attendance & Roster Monitoring
+              Malnad College of Engineering, Hassan &bull; Dept. of CSE &bull; AY 2026–2027
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -177,9 +177,9 @@ export const AdminDashboard = () => {
           </ul>
 
           <div style={{ marginTop: '20px', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
-            <div style={{ fontWeight: 600, fontSize: '12px', color: '#334155' }}>Institutional Rule</div>
+            <div style={{ fontWeight: 600, fontSize: '12px', color: '#334155' }}>Institutional Regulation (VTU / Autonomous)</div>
             <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-              Minimum 75% attendance is required under university guidelines for students to appear in end-semester examinations.
+              Minimum 75% attendance in each registered course is mandatory under Malnad College of Engineering academic regulations to appear for semester-end examinations.
             </p>
           </div>
         </Card>

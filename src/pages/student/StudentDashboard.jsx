@@ -75,8 +75,8 @@ export const StudentDashboard = () => {
           <strong>Examination Eligibility Status: {isEligible ? 'ELIGIBLE' : 'ATTENDANCE SHORTAGE'}</strong>
           {' '}&mdash; Your cumulative attendance is <strong>{stats.percentage}%</strong> across {stats.totalHeld} conducted lectures.
           {isEligible
-            ? ' This satisfies the mandatory university requirement of 75.0%.'
-            : ' You are currently below the required 75.0% threshold. Immediate remediation required.'}
+            ? ' This satisfies the mandatory institutional requirement of 75.0% under Malnad College of Engineering regulations.'
+            : ' You are currently below the required 75.0% threshold under Malnad College of Engineering regulations. Immediate remediation required.'}
         </div>
       </div>
 

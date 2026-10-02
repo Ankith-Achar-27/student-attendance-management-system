@@ -341,7 +341,7 @@ export const ManageStudents = () => {
               type="email"
               className="form-control"
               style={{ width: '100%' }}
-              placeholder="e.g. ananya.roy@niet.edu"
+              placeholder="e.g. ananya.roy@mce-sams.local"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />

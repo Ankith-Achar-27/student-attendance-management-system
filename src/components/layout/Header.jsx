@@ -23,10 +23,10 @@ export const Header = () => {
   return (
     <header className="app-header">
       <div className="header-brand">
-        <div className="brand-crest" title="College Crest">NI</div>
+        <div className="brand-crest" title="Malnad College of Engineering Crest">MCE</div>
         <div className="brand-text">
-          <h1>National Institute of Engineering & Technology</h1>
-          <p>Student Attendance Management System &bull; Academic Portal</p>
+          <h1>Malnad College of Engineering, Hassan</h1>
+          <p>Department of Computer Science and Engineering &bull; SAMS</p>
         </div>
       </div>
 

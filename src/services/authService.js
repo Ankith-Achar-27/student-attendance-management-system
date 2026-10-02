@@ -182,10 +182,7 @@ export const authService = {
       cleanPassword.toLowerCase() === 'faculty123' ||
       cleanPassword.toLowerCase() === 'student123';
 
-    if (
-      (cleanEmail === 'admin@college.edu' || cleanEmail === 'admin@niet.edu') &&
-      isDevPassword
-    ) {
+    if (cleanEmail === 'admin@mce-sams.local' && isDevPassword) {
       const adminUser = {
         uid: 'usr-admin-01',
         id: 'usr-admin-01',
@@ -193,7 +190,7 @@ export const authService = {
         email: cleanEmail,
         role: ROLES.ADMIN,
         code: 'ADM-01',
-        dept: 'Academic Affairs & Records',
+        dept: 'Academic Affairs - MCE Hassan',
         roleTitle: 'Institute Admin',
         initials: 'AD',
         linkedEntityId: null,
@@ -204,7 +201,7 @@ export const authService = {
 
     const allFaculty = await facultyService.getAll();
     let matchedFaculty = null;
-    if (cleanEmail === 'faculty@college.edu' && isDevPassword) {
+    if (cleanEmail === 'faculty@mce-sams.local' && isDevPassword) {
       matchedFaculty = (await facultyService.getByEmpId('FAC-104')) || allFaculty[0];
     } else {
       matchedFaculty = allFaculty.find(
@@ -213,6 +210,11 @@ export const authService = {
     }
 
     if (matchedFaculty && isDevPassword) {
+      const deptDisplay =
+        matchedFaculty.department === 'CSE'
+          ? 'Computer Science & Engineering'
+          : `${matchedFaculty.department} Department`;
+
       const facultyUser = {
         uid: `usr-${matchedFaculty.id}`,
         id: `usr-${matchedFaculty.id}`,
@@ -220,7 +222,7 @@ export const authService = {
         email: matchedFaculty.email,
         role: ROLES.FACULTY,
         code: matchedFaculty.employeeId,
-        dept: `${matchedFaculty.department} Department`,
+        dept: deptDisplay,
         roleTitle: matchedFaculty.designation,
         initials: matchedFaculty.name
           .split(' ')
@@ -236,7 +238,7 @@ export const authService = {
 
     const allStudents = await studentService.getAll();
     let matchedStudent = null;
-    if (cleanEmail === 'student@college.edu' && isDevPassword) {
+    if (cleanEmail === 'student@mce-sams.local' && isDevPassword) {
       matchedStudent = (await studentService.getByRoll('CS2024-042')) || allStudents[0];
     } else {
       matchedStudent = allStudents.find(
@@ -252,7 +254,7 @@ export const authService = {
         email: matchedStudent.email,
         role: ROLES.STUDENT,
         code: matchedStudent.rollNumber,
-        dept: `B.Tech ${matchedStudent.department} - Sem ${matchedStudent.semester} (${matchedStudent.section})`,
+        dept: `B.E. ${matchedStudent.department} - Sem ${matchedStudent.semester} (${matchedStudent.section})`,
         roleTitle: 'Enrolled Student',
         initials: matchedStudent.name
           .split(' ')

@@ -65,9 +65,9 @@ export const Sidebar = () => {
 
       <div className="sidebar-footer">
         <div style={{ fontWeight: 600, color: '#334155', marginBottom: '2px' }}>
-          Academic ERP System
+          Malnad College of Engg.
         </div>
-        <div>Current Session: 2026–27</div>
+        <div>Dept. of Computer Science & Engg.</div>
         <div style={{ color: '#166534', fontSize: '11px', marginTop: '4px', fontWeight: 500 }}>
           ● Authenticated ({currentRole || 'Guest'})
         </div>

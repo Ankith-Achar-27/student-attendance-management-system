@@ -76,10 +76,10 @@ export const LoginPage = () => {
     <div className="login-page-wrapper">
       <header className="login-top-banner">
         <div className="header-brand">
-          <div className="brand-crest">NI</div>
+          <div className="brand-crest">MCE</div>
           <div className="brand-text">
-            <h1>National Institute of Engineering & Technology</h1>
-            <p>Student Attendance Management System &bull; Academic Portal</p>
+            <h1>Malnad College of Engineering, Hassan</h1>
+            <p>Department of Computer Science and Engineering &bull; SAMS</p>
           </div>
         </div>
       </header>
@@ -87,9 +87,9 @@ export const LoginPage = () => {
       <main className="login-content-area">
         <div className="login-card">
           <div className="login-card-header">
-            <div className="login-crest-icon">NI</div>
+            <div className="login-crest-icon">MCE</div>
             <h2>Academic Portal Login</h2>
-            <p>Sign in to access your attendance, course roster, and records</p>
+            <p>Malnad College of Engineering &bull; Dept. of CSE</p>
           </div>
 
           <div className="login-card-body">
@@ -110,7 +110,7 @@ export const LoginPage = () => {
                   type="email"
                   className="form-control"
                   style={{ width: '100%' }}
-                  placeholder="e.g. yourname@college.edu"
+                  placeholder="e.g. yourname@mce-sams.local"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -146,10 +146,54 @@ export const LoginPage = () => {
                 </Button>
               </div>
             </form>
+
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                Demo Accounts (Click to autofill)
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '11px', padding: '5px 4px', textAlign: 'center' }}
+                  onClick={() => {
+                    setEmail('admin@mce-sams.local');
+                    setPassword('password123');
+                    setErrorMessage('');
+                  }}
+                >
+                  👤 Admin
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '11px', padding: '5px 4px', textAlign: 'center' }}
+                  onClick={() => {
+                    setEmail('faculty@mce-sams.local');
+                    setPassword('password123');
+                    setErrorMessage('');
+                  }}
+                >
+                  👨‍🏫 Faculty
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '11px', padding: '5px 4px', textAlign: 'center' }}
+                  onClick={() => {
+                    setEmail('student@mce-sams.local');
+                    setPassword('password123');
+                    setErrorMessage('');
+                  }}
+                >
+                  🎓 Student
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="login-footer-text">
-            For academic portal support or account access inquiries, contact the Registrar Office.
+            Malnad College of Engineering, Hassan &bull; Department of Computer Science & Engineering
           </div>
         </div>
       </main>

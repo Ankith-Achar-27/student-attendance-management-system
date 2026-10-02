@@ -1,33 +1,34 @@
 /**
  * Realistic Institutional Mock Dataset
- * Seed Data for National Institute of Engineering & Technology
+ * Seed Data for Malnad College of Engineering, Hassan
+ * Department of Computer Science and Engineering
  */
 
 export const INITIAL_STUDENTS = [
-  { id: 'stud-042', rollNumber: 'CS2024-042', name: 'Rahul Sharma', email: 'rahul.sharma@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-001', rollNumber: 'CS2024-001', name: 'Aarav Patel', email: 'aarav.patel@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-002', rollNumber: 'CS2024-002', name: 'Aditi Sharma', email: 'aditi.sharma@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-003', rollNumber: 'CS2024-003', name: 'Bhavya Varma', email: 'bhavya.varma@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-004', rollNumber: 'CS2024-004', name: 'Chetan Bhagat', email: 'chetan.b@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-005', rollNumber: 'CS2024-005', name: 'Deepika Rao', email: 'deepika.rao@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-006', rollNumber: 'CS2024-006', name: 'Eshwar Murthy', email: 'eshwar.m@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-007', rollNumber: 'CS2024-007', name: 'Farhan Akhtar', email: 'farhan.a@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-008', rollNumber: 'CS2024-008', name: 'Gitanjali Sen', email: 'gitanjali.s@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-019', rollNumber: 'CS2024-019', name: 'Rohan Mehra', email: 'rohan.mehra@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
-  { id: 'stud-031', rollNumber: 'CS2024-031', name: 'Tanvi Saxena', email: 'tanvi.s@niet.edu', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-042', rollNumber: 'CS2024-042', name: 'Rahul Sharma', email: 'rahul.sharma@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-001', rollNumber: 'CS2024-001', name: 'Aarav Patel', email: 'aarav.patel@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-002', rollNumber: 'CS2024-002', name: 'Aditi Sharma', email: 'aditi.sharma@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-003', rollNumber: 'CS2024-003', name: 'Bhavya Varma', email: 'bhavya.varma@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-004', rollNumber: 'CS2024-004', name: 'Chetan Bhagat', email: 'chetan.b@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-005', rollNumber: 'CS2024-005', name: 'Deepika Rao', email: 'deepika.rao@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-006', rollNumber: 'CS2024-006', name: 'Eshwar Murthy', email: 'eshwar.m@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-007', rollNumber: 'CS2024-007', name: 'Farhan Akhtar', email: 'farhan.a@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-008', rollNumber: 'CS2024-008', name: 'Gitanjali Sen', email: 'gitanjali.s@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-019', rollNumber: 'CS2024-019', name: 'Rohan Mehra', email: 'rohan.mehra@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
+  { id: 'stud-031', rollNumber: 'CS2024-031', name: 'Tanvi Saxena', email: 'tanvi.s@mce-sams.local', department: 'CSE', semester: 5, section: 'A', status: 'Active' },
   // Other departments for cross-department tests
-  { id: 'stud-012', rollNumber: 'EC2024-012', name: 'Devendra Nair', email: 'dev.nair@niet.edu', department: 'ECE', semester: 5, section: 'B', status: 'Active' },
-  { id: 'stud-015', rollNumber: 'EC2024-015', name: 'Manish Pandey', email: 'manish.p@niet.edu', department: 'ECE', semester: 5, section: 'B', status: 'Active' },
-  { id: 'stud-009', rollNumber: 'IT2024-009', name: 'Isha Deshmukh', email: 'isha.d@niet.edu', department: 'IT', semester: 3, section: 'A', status: 'Active' },
-  { id: 'stud-025', rollNumber: 'ME2024-025', name: 'Kunal Joshi', email: 'kunal.j@niet.edu', department: 'ME', semester: 7, section: 'A', status: 'Inactive' },
+  { id: 'stud-012', rollNumber: 'EC2024-012', name: 'Devendra Nair', email: 'dev.nair@mce-sams.local', department: 'ECE', semester: 5, section: 'B', status: 'Active' },
+  { id: 'stud-015', rollNumber: 'EC2024-015', name: 'Manish Pandey', email: 'manish.p@mce-sams.local', department: 'ECE', semester: 5, section: 'B', status: 'Active' },
+  { id: 'stud-009', rollNumber: 'IT2024-009', name: 'Isha Deshmukh', email: 'isha.d@mce-sams.local', department: 'IT', semester: 3, section: 'A', status: 'Active' },
+  { id: 'stud-025', rollNumber: 'ME2024-025', name: 'Kunal Joshi', email: 'kunal.j@mce-sams.local', department: 'ME', semester: 7, section: 'A', status: 'Inactive' },
 ];
 
 export const INITIAL_FACULTY = [
-  { id: 'fac-101', employeeId: 'FAC-101', name: 'Dr. Ramesh Kulkarni', email: 'ramesh.k@niet.edu', department: 'CSE', designation: 'Professor & HOD', status: 'Active' },
-  { id: 'fac-104', employeeId: 'FAC-104', name: 'Dr. Sarah Jenkins', email: 'sarah.j@niet.edu', department: 'CSE', designation: 'Associate Professor', status: 'Active' },
-  { id: 'fac-109', employeeId: 'FAC-109', name: 'Prof. Ananya Sen', email: 'ananya.s@niet.edu', department: 'ECE', designation: 'Assistant Professor', status: 'Active' },
-  { id: 'fac-114', employeeId: 'FAC-114', name: 'Prof. Vikram Malhotra', email: 'vikram.m@niet.edu', department: 'IT', designation: 'Assistant Professor', status: 'Active' },
-  { id: 'fac-120', employeeId: 'FAC-120', name: 'Dr. Preeti Deshpande', email: 'preeti.d@niet.edu', department: 'ME', designation: 'Associate Professor', status: 'Active' },
+  { id: 'fac-101', employeeId: 'FAC-101', name: 'Dr. Ramesh Kulkarni', email: 'ramesh.k@mce-sams.local', department: 'CSE', designation: 'Professor & HOD', status: 'Active' },
+  { id: 'fac-104', employeeId: 'FAC-104', name: 'Dr. Sarah Jenkins', email: 'sarah.j@mce-sams.local', department: 'CSE', designation: 'Associate Professor', status: 'Active' },
+  { id: 'fac-109', employeeId: 'FAC-109', name: 'Prof. Ananya Sen', email: 'ananya.s@mce-sams.local', department: 'ECE', designation: 'Assistant Professor', status: 'Active' },
+  { id: 'fac-114', employeeId: 'FAC-114', name: 'Prof. Vikram Malhotra', email: 'vikram.m@mce-sams.local', department: 'IT', designation: 'Assistant Professor', status: 'Active' },
+  { id: 'fac-120', employeeId: 'FAC-120', name: 'Dr. Preeti Deshpande', email: 'preeti.d@mce-sams.local', department: 'ME', designation: 'Associate Professor', status: 'Active' },
 ];
 
 export const INITIAL_SUBJECTS = [
