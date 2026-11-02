@@ -93,12 +93,6 @@ The application uses Firebase services for its cloud-oriented architecture.
                     Subject Data
 ```
 
-### Architecture Diagram
-
-![System Architecture](screenshots/architecture.png)
-
----
-
 ## 🎨 UI/UX Design
 
 The interface follows an institutional academic ERP style, with an emphasis on clarity, consistency, and accessibility.
