@@ -24,12 +24,10 @@ export const attendanceService = {
         const querySnapshot = await getDocs(collection(db, 'attendanceSessions'));
         const list = [];
         querySnapshot.forEach((d) => {
-          list.push({ id: d.id, ...d.data() });
+          list.push({ ...d.data(), id: d.id });
         });
-        if (list.length > 0) {
-          storageService.setItem(STORAGE_KEYS.SESSIONS, list);
-          return list;
-        }
+        storageService.setItem(STORAGE_KEYS.SESSIONS, list);
+        return list;
       } catch (err) {
         console.warn('Firestore attendance fetch fallback:', err.message);
       }
@@ -54,7 +52,11 @@ export const attendanceService = {
 
   async getSessionsBySubject(subjectId) {
     const sessions = await this.getAllSessions();
-    return sessions.filter((s) => s.subjectId === subjectId);
+    return sessions.filter(
+      (s) =>
+        s.subjectId === subjectId ||
+        (s.subjectId && subjectId && s.subjectId.trim().toLowerCase() === subjectId.trim().toLowerCase())
+    );
   },
 
   async getSessionsByFaculty(facultyId) {
@@ -120,7 +122,11 @@ export const attendanceService = {
         try {
           await updateDoc(doc(db, 'attendanceSessions', id), updatedSession);
         } catch (err) {
-          console.warn('Firestore session update failed:', err.message);
+          console.error('Firestore session update failed:', err);
+          return {
+            success: false,
+            error: err.message || 'Failed to update attendance session in Firestore.',
+          };
         }
       }
 
@@ -151,7 +157,11 @@ export const attendanceService = {
         try {
           await setDoc(doc(db, 'attendanceSessions', newSession.id), newSession);
         } catch (err) {
-          console.warn('Firestore session write failed:', err.message);
+          console.error('Firestore session write failed:', err);
+          return {
+            success: false,
+            error: err.message || 'Failed to save attendance session to Firestore.',
+          };
         }
       }
 
@@ -164,16 +174,17 @@ export const attendanceService = {
   // Calculate dynamic attendance stats for a single student in a specific subject
   async calculateStudentSubjectStats(studentId, subjectId) {
     const sessions = await this.getSessionsBySubject(subjectId);
-    let totalHeld = 0;
+    const totalHeld = sessions.length;
     let attended = 0;
 
     sessions.forEach((session) => {
-      const record = session.records?.find((r) => r.studentId === studentId);
-      if (record) {
-        totalHeld += 1;
-        if (record.status === 'PRESENT') {
-          attended += 1;
-        }
+      const record = session.records?.find(
+        (r) =>
+          r.studentId === studentId ||
+          (r.studentId && studentId && String(r.studentId).trim().toLowerCase() === String(studentId).trim().toLowerCase())
+      );
+      if (record && record.status === 'PRESENT') {
+        attended += 1;
       }
     });
 
@@ -182,11 +193,16 @@ export const attendanceService = {
   },
 
   // Calculate dynamic overall attendance stats for a single student across all enrolled subjects
-  async calculateStudentOverallStats(studentId) {
-    const student = await studentService.getById(studentId);
+  async calculateStudentOverallStats(studentOrId) {
+    const student = (typeof studentOrId === 'object' && studentOrId?.department && studentOrId?.semester)
+      ? studentOrId
+      : await studentService.resolveStudent(studentOrId);
+
     if (!student) {
       return { totalHeld: 0, attended: 0, percentage: 0, subjectBreakdown: [] };
     }
+
+    const canonicalStudentId = student.id;
 
     const subjects = await subjectService.getByDepartmentAndSemester(
       student.department,
@@ -198,7 +214,7 @@ export const attendanceService = {
     const subjectBreakdown = [];
 
     for (const subject of subjects) {
-      const stats = await this.calculateStudentSubjectStats(studentId, subject.id);
+      const stats = await this.calculateStudentSubjectStats(canonicalStudentId, subject.id);
       totalHeld += stats.totalHeld;
       totalAttended += stats.attended;
 
@@ -228,7 +244,9 @@ export const attendanceService = {
   },
 
   // Chronological attendance history for a student
-  async getStudentAttendanceHistory(studentId, filterSubjectId = null) {
+  async getStudentAttendanceHistory(studentOrId, filterSubjectId = null) {
+    const student = await studentService.resolveStudent(studentOrId);
+    const canonicalStudentId = student ? student.id : (typeof studentOrId === 'string' ? studentOrId : studentOrId?.id);
     const sessions = await this.getAllSessions();
     const history = [];
 
@@ -237,7 +255,11 @@ export const attendanceService = {
         continue;
       }
 
-      const record = session.records?.find((r) => r.studentId === studentId);
+      const record = session.records?.find(
+        (r) =>
+          r.studentId === canonicalStudentId ||
+          (r.studentId && canonicalStudentId && String(r.studentId).trim().toLowerCase() === String(canonicalStudentId).trim().toLowerCase())
+      );
       if (record) {
         const subject = await subjectService.getById(session.subjectId);
         history.push({

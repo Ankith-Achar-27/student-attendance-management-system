@@ -10,13 +10,13 @@ export const SubjectAttendance = () => {
   const [stats, setStats] = useState({ subjectBreakdown: [], student: null });
   const [facultyMap, setFacultyMap] = useState({});
 
-  useEffect(() => {
-    loadSubjectAttendance();
-  }, [activeUser]);
+  const loadSubjectAttendance = React.useCallback(async () => {
+    if (!activeUser) {
+      setStats({ subjectBreakdown: [], student: null });
+      return;
+    }
 
-  const loadSubjectAttendance = async () => {
-    const studentId = activeUser?.entityId || activeUser?.entity?.id || 'stud-042';
-    const computed = await attendanceService.calculateStudentOverallStats(studentId);
+    const computed = await attendanceService.calculateStudentOverallStats(activeUser);
     setStats(computed || { subjectBreakdown: [], student: null });
 
     const allFaculty = await facultyService.getAll();
@@ -25,7 +25,11 @@ export const SubjectAttendance = () => {
       map[f.id] = f.name;
     });
     setFacultyMap(map);
-  };
+  }, [activeUser]);
+
+  useEffect(() => {
+    loadSubjectAttendance();
+  }, [loadSubjectAttendance]);
 
   const handleExportCSV = () => {
     if (!stats.subjectBreakdown.length) return;

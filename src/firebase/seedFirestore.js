@@ -9,7 +9,6 @@ import {
   doc,
   getDocs,
   setDoc,
-  writeBatch,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './config';
 import {
@@ -18,7 +17,6 @@ import {
   INITIAL_SUBJECTS,
   INITIAL_ATTENDANCE_SESSIONS,
 } from '../data/seedData';
-import { ROLES } from '../services/authService';
 
 export const seedFirestore = {
   // Checks if Firestore currently contains collections
@@ -72,41 +70,6 @@ export const seedFirestore = {
       // 4. Seed Attendance Sessions
       for (const session of INITIAL_ATTENDANCE_SESSIONS) {
         await setDoc(doc(db, 'attendanceSessions', session.id), session);
-      }
-
-      // 5. Seed Core Mock User Roles into /users collection
-      const seedUsers = [
-        {
-          uid: 'usr-admin-01',
-          name: 'System Administrator',
-          email: 'admin@mce-sams.local',
-          role: ROLES.ADMIN,
-          linkedEntityId: null,
-          department: 'Academic Affairs - MCE Hassan',
-          status: 'Active',
-        },
-        {
-          uid: 'usr-fac-104',
-          name: 'Dr. Sarah Jenkins',
-          email: 'faculty@mce-sams.local',
-          role: ROLES.FACULTY,
-          linkedEntityId: 'fac-104',
-          department: 'Computer Science and Engineering',
-          status: 'Active',
-        },
-        {
-          uid: 'usr-stud-042',
-          name: 'Rahul Sharma',
-          email: 'student@mce-sams.local',
-          role: ROLES.STUDENT,
-          linkedEntityId: 'stud-042',
-          department: 'Computer Science and Engineering',
-          status: 'Active',
-        },
-      ];
-
-      for (const u of seedUsers) {
-        await setDoc(doc(db, 'users', u.uid), u);
       }
 
       console.log('Cloud Firestore successfully seeded with academic datasets.');

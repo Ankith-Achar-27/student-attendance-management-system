@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge } from '../../components/common/UIComponents';
 import { useRole } from '../../context/RoleContext';
 import { attendanceService } from '../../services/attendanceService';
+import { studentService } from '../../services/studentService';
 import { subjectService } from '../../services/subjectService';
 import { storageService } from '../../services/storageService';
 
@@ -11,27 +12,36 @@ export const AttendanceLog = () => {
   const [filterSubjectId, setFilterSubjectId] = useState('ALL');
   const [availableSubjects, setAvailableSubjects] = useState([]);
 
-  useEffect(() => {
-    loadHistory();
-  }, [activeUser, filterSubjectId]);
+  const loadHistory = React.useCallback(async () => {
+    if (!activeUser) {
+      setHistory([]);
+      setAvailableSubjects([]);
+      return;
+    }
 
-  const loadHistory = async () => {
-    const studentId = activeUser?.entityId || activeUser?.entity?.id || 'stud-042';
-    const log = await attendanceService.getStudentAttendanceHistory(studentId, filterSubjectId);
+    const log = await attendanceService.getStudentAttendanceHistory(activeUser, filterSubjectId);
     setHistory(log || []);
 
     // Get subjects applicable to student's department & semester
-    if (activeUser?.entity) {
+    const student = await studentService.resolveStudent(activeUser);
+    const department = student?.department || activeUser?.entity?.department;
+    const semester = student?.semester || activeUser?.entity?.semester;
+
+    if (department && semester) {
       const subs = await subjectService.getByDepartmentAndSemester(
-        activeUser.entity.department,
-        activeUser.entity.semester
+        department,
+        semester
       );
       setAvailableSubjects(subs || []);
     } else {
       const allSubs = await subjectService.getAll();
       setAvailableSubjects(allSubs || []);
     }
-  };
+  }, [activeUser, filterSubjectId]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const handleExportCSV = () => {
     if (!history.length) return;

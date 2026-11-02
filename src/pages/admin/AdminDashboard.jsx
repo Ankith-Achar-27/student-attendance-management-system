@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Badge } from '../../components/common/UIComponents';
@@ -11,11 +12,16 @@ export const AdminDashboard = () => {
     totalSubjects: 0,
     campusAverage: 0,
   });
+
   const [deptSummaries, setDeptSummaries] = useState([]);
 
   const loadData = React.useCallback(async () => {
-    const calculatedMetrics = await reportService.getOverallInstituteMetrics();
-    const calculatedSummaries = await reportService.getDepartmentSummaries();
+    const calculatedMetrics =
+      await reportService.getOverallInstituteMetrics();
+
+    const calculatedSummaries =
+      await reportService.getDepartmentSummaries();
+
     setMetrics(calculatedMetrics);
     setDeptSummaries(calculatedSummaries);
   }, []);
@@ -26,7 +32,18 @@ export const AdminDashboard = () => {
 
   const handleExportDefaulters = async () => {
     const defaulters = await reportService.getDefaulterList(75);
-    const headers = ['Roll Number', 'Student Name', 'Department', 'Semester', 'Section', 'Total Classes', 'Attended', 'Attendance %'];
+
+    const headers = [
+      'Roll Number',
+      'Student Name',
+      'Department',
+      'Semester',
+      'Section',
+      'Total Classes',
+      'Attended',
+      'Attendance %',
+    ];
+
     const rows = defaulters.map((d) => [
       d.rollNumber,
       d.name,
@@ -37,7 +54,12 @@ export const AdminDashboard = () => {
       d.attended,
       `${d.percentage}%`,
     ]);
-    storageService.exportToCSV('Campus_Defaulter_List_Below_75pct', headers, rows);
+
+    storageService.exportToCSV(
+      'Campus_Defaulter_List_Below_75pct',
+      headers,
+      rows
+    );
   };
 
   return (
@@ -50,17 +72,28 @@ export const AdminDashboard = () => {
           <span className="breadcrumb-separator">/</span>
           <span>Dashboard</span>
         </div>
+
         <div className="page-title-row">
           <div>
-            <h1 className="page-title">Institutional Overview & Administration</h1>
+            <h1 className="page-title">
+              Institutional Overview &amp; Administration
+            </h1>
+
             <p className="page-subtitle">
-              Malnad College of Engineering, Hassan &bull; Department of Computer Science and Engineering &bull; AY 2026–2027
+              Malnad College of Engineering, Hassan &bull; Department of
+              Computer Science and Engineering &bull; AY 2026–2027
             </p>
           </div>
+
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="secondary" size="sm" onClick={handleExportDefaulters}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleExportDefaulters}
+            >
               Download Defaulter List (CSV)
             </Button>
+
             <Link to="/admin/students">
               <Button size="sm">+ Manage Students</Button>
             </Link>
@@ -68,37 +101,55 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Aggregate Metrics Grid (Dynamically Calculated) */}
+      {/* Aggregate Metrics Grid */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Enrolled Students</div>
           <div className="stat-value">{metrics.totalStudents}</div>
-          <div className="stat-desc">Active institutional registrations</div>
+          <div className="stat-desc">
+            Active institutional registrations
+          </div>
         </div>
+
         <div className="stat-card">
           <div className="stat-label">Faculty Members</div>
           <div className="stat-value">{metrics.totalFaculty}</div>
           <div className="stat-desc">Active instructional staff</div>
         </div>
+
         <div className="stat-card">
           <div className="stat-label">Active Subjects</div>
           <div className="stat-value">{metrics.totalSubjects}</div>
           <div className="stat-desc">Curriculum course offerings</div>
         </div>
+
         <div className="stat-card">
           <div className="stat-label">Campus Attendance Avg.</div>
+
           <div
             className="stat-value"
-            style={{ color: metrics.campusAverage >= 75 ? '#166534' : '#991b1b' }}
+            style={{
+              color:
+                metrics.campusAverage >= 75 ? '#166534' : '#991b1b',
+            }}
           >
             {metrics.campusAverage}%
           </div>
-          <div className="stat-desc">Computed across all recorded sessions</div>
+
+          <div className="stat-desc">
+            Computed across all recorded sessions
+          </div>
         </div>
       </div>
 
       {/* Departmental Overview & Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '20px',
+        }}
+      >
         <Card title="Departmental Attendance Summaries (Calculated Live)">
           <div className="table-wrapper">
             <table className="data-table">
@@ -112,26 +163,51 @@ export const AdminDashboard = () => {
                   <th>Compliance</th>
                 </tr>
               </thead>
+
               <tbody>
                 {deptSummaries.map((dept) => (
                   <tr key={dept.code}>
-                    <td><strong>{dept.name}</strong></td>
-                    <td className="tabular-nums">{dept.studentCount}</td>
-                    <td className="tabular-nums">{dept.facultyCount}</td>
-                    <td className="tabular-nums" style={{ fontWeight: 600 }}>
-                      {dept.avgAttendance > 0 ? `${dept.avgAttendance}%` : 'N/A'}
+                    <td>
+                      <strong>{dept.name}</strong>
                     </td>
-                    <td className="tabular-nums" style={{ color: dept.defaultersCount > 0 ? '#991b1b' : 'inherit' }}>
+
+                    <td className="tabular-nums">
+                      {dept.studentCount}
+                    </td>
+
+                    <td className="tabular-nums">
+                      {dept.facultyCount}
+                    </td>
+
+                    <td
+                      className="tabular-nums"
+                      style={{ fontWeight: 600 }}
+                    >
+                      {dept.avgAttendance > 0
+                        ? `${dept.avgAttendance}%`
+                        : 'N/A'}
+                    </td>
+
+                    <td
+                      className="tabular-nums"
+                      style={{
+                        color:
+                          dept.defaultersCount > 0
+                            ? '#991b1b'
+                            : 'inherit',
+                      }}
+                    >
                       {dept.defaultersCount}
                     </td>
+
                     <td>
                       <Badge
                         variant={
                           dept.status === 'Normal'
                             ? 'present'
                             : dept.status === 'Borderline'
-                            ? 'warning'
-                            : 'absent'
+                              ? 'warning'
+                              : 'absent'
                         }
                       >
                         {dept.status}
@@ -145,41 +221,112 @@ export const AdminDashboard = () => {
         </Card>
 
         <Card title="Quick Administrative Actions">
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <ul
+            style={{
+              listStyle: 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}
+          >
             <li>
-              <Link to="/admin/students" style={{ textDecoration: 'none' }}>
-                <Button variant="secondary" style={{ width: '100%', justifyContent: 'flex-start' }}>
-                  🎓 Register & Manage Students
+              <Link
+                to="/admin/students"
+                style={{ textDecoration: 'none' }}
+              >
+                <Button
+                  variant="secondary"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  🎓 Register &amp; Manage Students
                 </Button>
               </Link>
             </li>
+
             <li>
-              <Link to="/admin/faculty" style={{ textDecoration: 'none' }}>
-                <Button variant="secondary" style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <Link
+                to="/admin/faculty"
+                style={{ textDecoration: 'none' }}
+              >
+                <Button
+                  variant="secondary"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'flex-start',
+                  }}
+                >
                   👨‍🏫 Manage Faculty Directory
                 </Button>
               </Link>
             </li>
+
             <li>
-              <Link to="/admin/subjects" style={{ textDecoration: 'none' }}>
-                <Button variant="secondary" style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <Link
+                to="/admin/subjects"
+                style={{ textDecoration: 'none' }}
+              >
+                <Button
+                  variant="secondary"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'flex-start',
+                  }}
+                >
                   📚 Allocate Courses to Faculty
                 </Button>
               </Link>
             </li>
+
             <li>
-              <Link to="/admin/reports" style={{ textDecoration: 'none' }}>
-                <Button variant="secondary" style={{ width: '100%', justifyContent: 'flex-start' }}>
-                  📑 View Semester Defaulters & Audits
+              <Link
+                to="/admin/reports"
+                style={{ textDecoration: 'none' }}
+              >
+                <Button
+                  variant="secondary"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  📑 View Semester Defaulters &amp; Audits
                 </Button>
               </Link>
             </li>
           </ul>
 
-          <div style={{ marginTop: '20px', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
-            <div style={{ fontWeight: 600, fontSize: '12px', color: '#334155' }}>Institutional Regulation (VTU / Autonomous)</div>
-            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-              Minimum 75% attendance in each registered course is mandatory under Malnad College of Engineering academic regulations to appear for semester-end examinations.
+          <div
+            style={{
+              marginTop: '20px',
+              padding: '12px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: '12px',
+                color: '#334155',
+              }}
+            >
+              Institutional Regulation (VTU / Autonomous)
+            </div>
+
+            <p
+              style={{
+                fontSize: '12px',
+                color: '#64748b',
+                marginTop: '4px',
+              }}
+            >
+              Minimum 75% attendance in each registered course is mandatory
+              under Malnad College of Engineering academic regulations to
+              appear for semester-end examinations.
             </p>
           </div>
         </Card>

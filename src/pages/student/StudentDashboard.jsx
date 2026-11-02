@@ -16,13 +16,19 @@ export const StudentDashboard = () => {
   });
   const [facultyMap, setFacultyMap] = useState({});
 
-  useEffect(() => {
-    loadStudentStats();
-  }, [activeUser]);
+  const loadStudentStats = React.useCallback(async () => {
+    if (!activeUser) {
+      setStats({
+        totalHeld: 0,
+        attended: 0,
+        percentage: 0,
+        isShortage: false,
+        subjectBreakdown: [],
+      });
+      return;
+    }
 
-  const loadStudentStats = async () => {
-    const studentId = activeUser?.entityId || activeUser?.entity?.id || 'stud-042';
-    const computed = await attendanceService.calculateStudentOverallStats(studentId);
+    const computed = await attendanceService.calculateStudentOverallStats(activeUser);
     setStats(computed || {
       totalHeld: 0,
       attended: 0,
@@ -38,7 +44,11 @@ export const StudentDashboard = () => {
       map[f.id] = f.name;
     });
     setFacultyMap(map);
-  };
+  }, [activeUser]);
+
+  useEffect(() => {
+    loadStudentStats();
+  }, [loadStudentStats]);
 
   const absences = stats.totalHeld - stats.attended;
   const isEligible = stats.percentage >= 75.0 || stats.totalHeld === 0;

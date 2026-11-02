@@ -22,12 +22,10 @@ export const subjectService = {
         const querySnapshot = await getDocs(collection(db, 'subjects'));
         const list = [];
         querySnapshot.forEach((d) => {
-          list.push({ id: d.id, ...d.data() });
+          list.push({ ...d.data(), id: d.id });
         });
-        if (list.length > 0) {
-          storageService.setItem(STORAGE_KEYS.SUBJECTS, list);
-          return list;
-        }
+        storageService.setItem(STORAGE_KEYS.SUBJECTS, list);
+        return list;
       } catch (err) {
         console.warn('Firestore subjects fetch fallback:', err.message);
       }
@@ -40,7 +38,7 @@ export const subjectService = {
       try {
         const docSnap = await getDoc(doc(db, 'subjects', id));
         if (docSnap.exists()) {
-          return { id: docSnap.id, ...docSnap.data() };
+          return { ...docSnap.data(), id: docSnap.id };
         }
       } catch (err) {
         console.warn('Firestore subject getById fallback:', err.message);
@@ -63,16 +61,55 @@ export const subjectService = {
   async getByFaculty(facultyId) {
     if (!facultyId) return [];
     const subjects = await this.getAll();
-    return subjects.filter((s) => s.facultyId === facultyId);
+    return subjects.filter(
+      (s) =>
+        s.facultyId === facultyId ||
+        (s.facultyId && facultyId && s.facultyId.trim().toLowerCase() === String(facultyId).trim().toLowerCase())
+    );
   },
 
   async getByDepartmentAndSemester(department, semester) {
     const subjects = await this.getAll();
-    return subjects.filter((s) => {
-      const matchDept = !department || s.department.toLowerCase() === department.toLowerCase();
-      const matchSem = !semester || Number(s.semester) === Number(semester);
+
+    const normalizeDept = (dept) => {
+      if (!dept) return '';
+      const d = String(dept).trim().toUpperCase();
+      if (d.includes('COMPUTER') || /\bCSE\b/.test(d) || /\bCS\b/.test(d) || d === 'CSE' || d === 'CS') return 'CSE';
+      if (d.includes('ELECTRONIC') || /\bECE\b/.test(d) || /\bEC\b/.test(d) || d === 'ECE' || d === 'EC') return 'ECE';
+      if (d.includes('INFORMATION') || /\bIT\b/.test(d) || d === 'IT') return 'IT';
+      if (d.includes('MECHANICAL') || /\bME\b/.test(d) || d === 'ME') return 'ME';
+      return d;
+    };
+
+    const parseSemester = (sem) => {
+      if (sem === null || sem === undefined || sem === '') return null;
+      if (typeof sem === 'number' && !isNaN(sem)) return sem;
+      const match = String(sem).match(/\d+/);
+      return match ? parseInt(match[0], 10) : null;
+    };
+
+    const targetDept = normalizeDept(department);
+    const targetSem = parseSemester(semester);
+
+    const matches = subjects.filter((s) => {
+      const sDept = normalizeDept(s.department);
+      const sSem = parseSemester(s.semester);
+      const matchDept = !targetDept || sDept === targetDept;
+      const matchSem = targetSem === null || sSem === null || sSem === targetSem;
       return matchDept && matchSem;
     });
+
+    if (matches.length > 0) {
+      return matches;
+    }
+
+    // Fallback: If department matched but semester formatting differed, return department subjects
+    if (targetDept) {
+      const deptMatches = subjects.filter((s) => normalizeDept(s.department) === targetDept);
+      if (deptMatches.length > 0) return deptMatches;
+    }
+
+    return matches;
   },
 
   async validate(data, currentId = null) {

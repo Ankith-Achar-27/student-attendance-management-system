@@ -17,11 +17,18 @@ export const EditAttendance = () => {
   const [notice, setNotice] = useState(null);
 
   const loadSubjects = React.useCallback(async () => {
-    const facultyId = activeUser?.entityId || activeUser?.entity?.id;
+    const facultyId =
+      activeUser?.linkedEntityId ||
+      activeUser?.entityId ||
+      activeUser?.entity?.id ||
+      (activeUser?.id?.startsWith('fac-') ? activeUser.id : null) ||
+      null;
     const subs = facultyId ? await subjectService.getByFaculty(facultyId) : [];
     setAssignedSubjects(subs || []);
     if (subs && subs.length > 0) {
-      setSelectedSubjectId(subs[0].id);
+      setSelectedSubjectId((currentId) =>
+        subs.some((s) => s.id === currentId) ? currentId : subs[0].id
+      );
     } else {
       setSelectedSubjectId('');
       setAvailableSessions([]);
