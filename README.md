@@ -7,6 +7,8 @@ A practical institutional web application for managing, monitoring, and auditing
 
 Developed as a **Cloud Computing** project using **React + Vite** and Firebase services, with a service-layer architecture for authentication, attendance management, and role-based access.
 
+🌐 **Live Application URL:** [https://attendance-management-sy-22e0a.firebaseapp.com/login](https://attendance-management-sy-22e0a.firebaseapp.com/login)
+
 ---
 
 ## 📸 Application Screenshots
@@ -221,6 +223,8 @@ npm run preview
 ## ☁️ Firebase Deployment
 
 The repository includes Firebase configuration for Hosting.
+
+- **Live Deployment:** [https://attendance-management-sy-22e0a.firebaseapp.com/login](https://attendance-management-sy-22e0a.firebaseapp.com/login)
 
 After configuring your Firebase project and building the frontend, deploy the Hosting target using:
 
